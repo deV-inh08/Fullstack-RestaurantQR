@@ -2,6 +2,8 @@
 import authApiRequest from "@/src/apiRequests/auth.request";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+
+
 export const POST = async (request: NextRequest) => {
     const cookieStore = await cookies()
     // get token from next client -> (request) -> next server

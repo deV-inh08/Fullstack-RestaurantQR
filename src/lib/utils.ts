@@ -10,7 +10,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
 export const normalizePath = (path: string) => {
   return path.startsWith('/') ? path.slice(1) : path
 }
@@ -22,41 +21,17 @@ export function getClientCookie(name: string): string | undefined {
     ?.split('=')[1]
 }
 
-const TOKEN_KEYS = {
-  ACCESS: 'accessToken',
-  REFRESH: 'refreshToken',
-} as const
-
-export function setAccessTokenToLocalStorage(token: string): void {
-  localStorage.setItem(TOKEN_KEYS.ACCESS, token)
-}
-
-export function setRefreshTokenToLocalStorage(token: string): void {
-  localStorage.setItem(TOKEN_KEYS.REFRESH, token)
-}
-const isBrowser = typeof window !== 'undefined'
-
-export const getAccessTokenFromLocalStorage = () =>
-  isBrowser ? localStorage.getItem('accessToken') : null
-
-export const getRefreshTokenFromLocalStorage = () =>
-  isBrowser ? localStorage.getItem('refreshToken') : null
-
-export function removeTokensFromLS(): void {
-  localStorage.removeItem(TOKEN_KEYS.ACCESS)
-  localStorage.removeItem(TOKEN_KEYS.REFRESH)
-}
-
+// decodeToken vẫn giữ lại vì middleware.ts cần decode JWT đọc từ cookie ở
+// server-side để biết role — đây là việc hợp lệ, không phải lưu token ở
+// client. KHÔNG còn setAccessTokenToLocalStorage / getAccessTokenFromLocalStorage /
+// removeTokensFromLS nữa — token không còn được phép chạm localStorage.
 export const decodeToken = (token: string): JwtPayload | string | null => {
   return jwt.decode(token)
 }
 
-
 export const formatCurrency = (number: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number)
 }
-
-
 
 export function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
@@ -89,8 +64,8 @@ export const handleImageURL = (path: string) => {
   // imagePath có thể là relative path hoặc full URL
   if (!path) return null
   if (path.startsWith('http')) return path
-
-  // Xóa '/api/v1' khỏi baseUrl vì ảnh thường được serve ở thư mục gốc của BE
-  const baseUrl = envConfig.NEXT_PUBLIC_API_MENU.replace('/api/v1', '')
-  return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`
+  return `${envConfig.NEXT_PUBLIC_MENU_ASSETS_URL}${path.startsWith('/') ? '' : '/'}${path}`
 }
+
+
+

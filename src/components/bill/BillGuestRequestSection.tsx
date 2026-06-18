@@ -11,11 +11,9 @@ type BillState = 'idle' | 'requesting' | 'requested'
 
 export default function BillGuestRequestSection({
     orders,
-    accessToken,
     billPaid = false,
 }: {
     orders: OrderDto[]
-    accessToken: string | null
     billPaid?: boolean
 }) {
     const [billState, setBillState] = useState<BillState>('idle')
@@ -30,10 +28,10 @@ export default function BillGuestRequestSection({
     if (activeOrders.length === 0) return null
 
     const handleRequest = async () => {
-        if (!accessToken || billState !== 'idle') return
+        if (billState !== 'idle') return
         setBillState('requesting')
         try {
-            await requestBillMutation.mutateAsync(accessToken)
+            await requestBillMutation.mutateAsync()
             setBillState('requested')
             toast.success('Đã gửi yêu cầu thanh toán. Nhân viên sẽ đến ngay!')
         } catch {

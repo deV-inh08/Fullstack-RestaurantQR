@@ -1,58 +1,64 @@
 'use client'
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { create } from 'zustand'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { decodeToken, getAccessTokenFromLocalStorage, removeTokensFromLS } from "@/src/lib/utils"
 import { RoleType } from '../constants/role'
+import { useGetMe } from '../queries/useAccount'
 
-
-interface AppProvider {
+interface AppProviderState {
     isAuth: boolean
     role: RoleType | undefined
-    setRole: (role?: RoleType | undefined) => void
+    setRole: (role?: RoleType) => void
 }
 
-export const useAppProviderStore = create<AppProvider>()((set) => ({
+export const useAppProviderStore = create<AppProviderState>()((set) => ({
     isAuth: false,
-    role: undefined as RoleType | undefined,
-    setRole: (role: RoleType | undefined) => {
-        set({ role, isAuth: Boolean(role) })
-        if (!role) {
-            removeTokensFromLS()
-        }
-    }
+    role: undefined,
+    setRole: (role) => set({ role, isAuth: Boolean(role) }),
 }))
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            // Tab 1 -> Tab 2 => refetch API
-            // false: Chuyển tab không refetch API
             refetchOnWindowFocus: false,
             refetchOnMount: true,
         }
     }
 })
 
-function AppProvider({ children }: { children: React.ReactNode }) {
-
+/**
+ * Không còn decode JWT từ localStorage nữa. Role giờ lấy bằng cách hỏi
+ * server qua getMe() (đi qua BFF proxy, server tự đọc httpOnly cookie và
+ * gắn Authorization hộ). Trên trang public/guest, request này trả 401 —
+ * đó là kết quả mong đợi, không phải lỗi cần xử lý đặc biệt.
+ *
+ * Phải nằm trong component CON của QueryClientProvider vì useGetMe() dùng
+ * useQuery.
+ */
+function AuthBootstrap() {
     const setRole = useAppProviderStore((state) => state.setRole)
+    const { data, isError } = useGetMe()
 
     useEffect(() => {
-        const accessToken = getAccessTokenFromLocalStorage()
-        if (accessToken) {
-            const decodeAccessToken = decodeToken(accessToken) as { role: RoleType }
-            setRole(decodeAccessToken.role)
+        if (data?.payload?.data?.role) {
+            setRole(data.payload.data.role as RoleType)
+        } else if (isError) {
+            setRole(undefined)
         }
-    }, [])
+    }, [data, isError, setRole])
 
+    return null
+}
+
+function AppProvider({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
+            <AuthBootstrap />
             {children}
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     )
 }
 
-export default AppProvider;
+export default AppProvider

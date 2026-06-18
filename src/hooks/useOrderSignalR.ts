@@ -1,89 +1,76 @@
-/**
- * useOrderSignalR.ts
- *
- * Hook quản lý kết nối SignalR với Order.API/hubs/order
- *
- * Cài package trước:
- *   npm install @microsoft/signalr
- *
- * Cách dùng:
- *   Staff:  useOrderSignalR({ role: 'staff', token: accessToken })
- *   Guest:  useOrderSignalR({ role: 'guest', tableId: 3, token: guestToken })
- */
-
 import { useEffect, useRef } from 'react'
 import * as signalR from '@microsoft/signalr'
 import envConfig from '@/src/config'
 import type { OrderDto } from '@/src/schema/order.schema'
 import type { BillDto } from '@/src/schema/bill.schema'
-import { TableDto } from '../schema/table.schema'
+import type { TableDto } from '@/src/schema/table.schema'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-type StaffOptions = {
-    role: 'staff'
-    token: string | null
+type CommonOptions = {
+    enabled: boolean
     onOrderCreated?: (order: OrderDto) => void
     onOrderStatusUpdated?: (order: OrderDto) => void
-    onTableStatusChanged?: (table: TableDto) => void
-    onBillRequested?: (bill: BillDto) => void   // ← thêm
-    onBillPaid?: (bill: BillDto) => void        // ← thêm
+    onBillRequested?: (bill: BillDto) => void
+    onBillPaid?: (bill: BillDto) => void
 }
 
-type GuestOptions = {
+type StaffOptions = CommonOptions & {
+    role: 'staff'
+    onTableStatusChanged?: (table: TableDto) => void
+}
+
+type GuestOptions = CommonOptions & {
     role: 'guest'
     tableNumber: number
-    token: string | null
-    onOrderCreated?: (order: OrderDto) => void
-    onOrderStatusUpdated?: (order: OrderDto) => void,
-    onBillRequested?: (bill: BillDto) => void   // ← thêm
-    onBillPaid?: (bill: BillDto) => void        // ← thêm
 }
 
 type Options = StaffOptions | GuestOptions
 
-// ─── Hook ────────────────────────────────────────────────────────────────────
-
+/**
+ * accessTokenFactory tự fetch token từ BFF (/api/realtime-token hoặc
+ * /api/guest/realtime-token) ngay trước mỗi lần connect/reconnect.
+ * Token KHÔNG còn được truyền vào từ ngoài, KHÔNG còn đọc từ
+ * localStorage/sessionStorage, và không được giữ lại ở đâu khác ngoài
+ * bộ nhớ tạm của chính SignalR client trong lúc kết nối — đây là ngoại lệ
+ * BFF duy nhất bắt buộc phải có vì WebSocket cần token ngay tại browser.
+ */
 export function useOrderSignalR(options: Options) {
     const connectionRef = useRef<signalR.HubConnection | null>(null)
 
-    const role = options.role
-    const tableNumber = (options as GuestOptions).tableNumber
-
-    console.log('tableNumber___________________________________________', tableNumber)
-    console.log('role___________________________________________', role)
-    // Dùng ref để tránh re-create connection khi callback thay đổi
     const onOrderCreatedRef = useRef(options.onOrderCreated)
     const onOrderStatusUpdatedRef = useRef(options.onOrderStatusUpdated)
+    const onBillRequestedRef = useRef(options.onBillRequested)
+    const onBillPaidRef = useRef(options.onBillPaid)
+    const onTableStatusChangedRef = useRef(
+        options.role === 'staff' ? options.onTableStatusChanged : undefined
+    )
     onOrderCreatedRef.current = options.onOrderCreated
     onOrderStatusUpdatedRef.current = options.onOrderStatusUpdated
-    const onTableStatusChangedRef = useRef((options as StaffOptions).onTableStatusChanged)
-    onTableStatusChangedRef.current = (options as StaffOptions).onTableStatusChanged
+    onBillRequestedRef.current = options.onBillRequested
+    onBillPaidRef.current = options.onBillPaid
+    onTableStatusChangedRef.current = options.role === 'staff' ? options.onTableStatusChanged : undefined
 
-    // Bill
-    const onBillRequestedRef = useRef((options as StaffOptions).onBillRequested)
-    const onBillPaidRef = useRef((options as StaffOptions).onBillPaid)
-    onBillRequestedRef.current = (options as StaffOptions).onBillRequested
-    onBillPaidRef.current = (options as any).onBillPaid
+    const tableNumber = options.role === 'guest' ? options.tableNumber : undefined
 
     useEffect(() => {
-        onBillPaidRef.current = options.onBillPaid  // ← update mỗi render
-    }, [options.onBillPaid])
-
-    useEffect(() => {
-        if (!options.token) return
+        if (!options.enabled) return
 
         const hubUrl = `${envConfig.NEXT_PUBLIC_SIGNALR_ORDER}/hubs/order`
-
-
+        const tokenEndpoint = options.role === 'staff' ? '/api/realtime-token' : '/api/guest/realtime-token'
 
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
-                // SignalR WebSocket không support custom headers
-                // → gửi token qua query string
-                accessTokenFactory: () => options.token ?? '',
+                accessTokenFactory: async () => {
+                    try {
+                        const res = await fetch(tokenEndpoint)
+                        if (!res.ok) return ''
+                        const data = await res.json()
+                        return data.accessToken ?? ''
+                    } catch {
+                        return ''
+                    }
+                },
             })
-            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // retry sau 0s, 2s, 5s, 10s, 30s
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(
                 process.env.NODE_ENV === 'development'
                     ? signalR.LogLevel.Information
@@ -91,75 +78,37 @@ export function useOrderSignalR(options: Options) {
             )
             .build()
 
-        // ── Đăng ký event handlers ────────────────────────────────────────
-        connection.on('OrderCreated', (order: OrderDto) => {
-            onOrderCreatedRef.current?.(order)
-        })
+        connection.on('OrderCreated', (order: OrderDto) => onOrderCreatedRef.current?.(order))
+        connection.on('OrderStatusUpdated', (order: OrderDto) => onOrderStatusUpdatedRef.current?.(order))
+        connection.on('TableStatusChanged', (table: TableDto) => onTableStatusChangedRef.current?.(table))
+        connection.on('BillRequested', (bill: BillDto) => onBillRequestedRef.current?.(bill))
+        connection.on('BillPaid', (bill: BillDto) => onBillPaidRef.current?.(bill))
 
-        connection.on('OrderStatusUpdated', (order: OrderDto) => {
-            onOrderStatusUpdatedRef.current?.(order)
-        })
+        const join = async () => {
+            try {
+                if (options.role === 'staff') {
+                    await connection.invoke('JoinStaffGroup')
+                } else {
+                    await connection.invoke('JoinTableGroup', options.tableNumber)
+                }
+            } catch (err) {
+                console.error('[SignalR] Failed to join group:', err)
+            }
+        }
 
-        connection.on('TableStatusChanged', (table: TableDto) => {
-            onTableStatusChangedRef.current?.(table)
+        connection.onreconnected(() => { join() })
+        connection.start().then(join).catch((err) => {
+            console.error('[SignalR] Connection failed:', err)
         })
-
-        connection.on('BillRequested', (bill: BillDto) => {
-            onBillRequestedRef.current?.(bill)
-        })
-        connection.on('BillPaid', (bill) => {
-            console.log('[SignalR] BillPaid received on guest side:', bill)
-            console.log('[SignalR] onBillPaidRef.current:', onBillPaidRef.current)
-            onBillPaidRef.current?.(bill)
-        })
-
-        // ── Xử lý reconnect ───────────────────────────────────────────────
-        connection.onreconnected(async () => {
-            console.log('[SignalR] Reconnected')
-            await joinGroup(connection, options)
-        })
-
-        connection.onclose(() => {
-            console.log('[SignalR] Connection closed')
-        })
-
-        // ── Start ─────────────────────────────────────────────────────────
-        connection
-            .start()
-            .then(async () => {
-                console.log('[SignalR] Connected')
-                await joinGroup(connection, options)
-            })
-            .catch((err) => {
-                console.error('[SignalR] Connection failed:', err)
-            })
 
         connectionRef.current = connection
 
-        // ── Cleanup ───────────────────────────────────────────────────────
         return () => {
             connection.stop()
             connectionRef.current = null
         }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [options.token, options.role, (options as GuestOptions).tableNumber])
+    }, [options.enabled, options.role, tableNumber])
 
     return connectionRef
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-async function joinGroup(connection: signalR.HubConnection, options: Options) {
-    try {
-        if (options.role === 'staff') {
-            await connection.invoke('JoinStaffGroup')
-            console.log('[SignalR] Joined staff group')
-        } else {
-            await connection.invoke('JoinTableGroup', options.tableNumber)
-            console.log(`[SignalR] Joined table-${options.tableNumber} group`)
-        }
-    } catch (err) {
-        console.error('[SignalR] Failed to join group:', err)
-    }
 }

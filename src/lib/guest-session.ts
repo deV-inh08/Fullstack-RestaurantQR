@@ -1,33 +1,17 @@
 /**
- * Guest tokens → sessionStorage (tab-scoped)
- * Admin tokens → localStorage (cross-tab persistent)
- *
- * Lý do tách biệt:
- * - Guest session kết thúc khi đóng tab — không nên persist
- * - Tránh xung đột nếu nhân viên dùng cùng browser để test
- * - http.ts chỉ đọc admin token từ localStorage → không ảnh hưởng lẫn nhau
+ * Guest token KHÔNG còn lưu ở sessionStorage nữa — chúng nằm trong httpOnly
+ * cookie (guestAccessToken / guestRefreshToken) do route handler
+ * /api/guest-auth/* set. File này giờ chỉ giữ thông tin HIỂN THỊ (tên khách,
+ * số bàn) — không phải dữ liệu xác thực, JS phía client không cần và không
+ * được phép đọc token nữa.
  */
 
 const KEYS = {
-    ACCESS: 'guestAccessToken',
-    REFRESH: 'guestRefreshToken',
     NAME: 'guestName',
     TABLE_NUMBER: 'guestTableNumber',
 } as const
 
 const isBrowser = typeof window !== 'undefined'
-
-export const setGuestTokens = (accessToken: string, refreshToken: string) => {
-    if (!isBrowser) return
-    sessionStorage.setItem(KEYS.ACCESS, accessToken)
-    sessionStorage.setItem(KEYS.REFRESH, refreshToken)
-}
-
-export const getGuestAccessToken = (): string | null =>
-    isBrowser ? sessionStorage.getItem(KEYS.ACCESS) : null
-
-export const getGuestRefreshToken = (): string | null =>
-    isBrowser ? sessionStorage.getItem(KEYS.REFRESH) : null
 
 export const setGuestInfo = (name: string, tableNumber: number) => {
     if (!isBrowser) return
@@ -48,5 +32,8 @@ export const clearGuestSession = () => {
     Object.values(KEYS).forEach(k => sessionStorage.removeItem(k))
 }
 
-export const isGuestLoggedIn = (): boolean =>
-    isBrowser ? Boolean(sessionStorage.getItem(KEYS.ACCESS)) : false
+// Không còn cách nào để JS đọc token guest (nó là httpOnly), nên "đã đăng
+// nhập" được suy ra từ việc có guest info hiển thị hay không. Phiên có thật
+// sự còn sống hay không do API tự quyết — nếu cookie hết hạn, các trang gọi
+// guest API sẽ nhận 401 và tự redirect về welcome (xem auth.service.ts).
+export const isGuestLoggedIn = (): boolean => Boolean(getGuestInfo())

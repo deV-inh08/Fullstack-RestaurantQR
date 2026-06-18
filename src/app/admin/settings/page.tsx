@@ -19,7 +19,6 @@ import { handleErrorApi } from "@/src/lib/utils"
 import { useAppProviderStore } from "@/src/components/app-provider"
 import { useRouter } from "next/navigation"
 import authApiRequest from "@/src/apiRequests/auth.request"
-import { removeTokensFromLS } from "@/src/lib/utils"
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -71,7 +70,6 @@ export default function SettingsPage() {
       // Backend revokes ALL refresh tokens on change-password (agents.md §3.2)
       // → must logout client to avoid stale tokens
       await authApiRequest.logout()
-      removeTokensFromLS()
       setRole(undefined)
       router.push("/login")
     } catch (error) {

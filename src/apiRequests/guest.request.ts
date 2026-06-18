@@ -1,53 +1,28 @@
 import http from '../lib/http'
-import { GuestDtoType, GuestLoginBodyType, GuestLoginResponseType, GuestOrderListResponseType, GuestRefreshTokenResponseType } from '@/src/schema/guest.schema'
+import {
+    GuestLoginBodyType,
+    GuestOrderListResponseType,
+    GuestLoginClientResponseType
+} from '../schema/guest.schema'
 
-
-// ─── API requests ──────────────────────────────────────────────────────────────
+/**
+ * Toàn bộ guest API giờ đi qua BFF:
+ * - login/refreshToken: route handler riêng (/api/guest-auth/*) vì cần set
+ *   httpOnly cookie — không thể đi qua catch-all proxy forward thuần.
+ * - các API còn lại: service: 'guest' → catch-all proxy
+ *   (src/app/api/[...path]/route.ts) tự gắn guestAccessToken cookie thành
+ *   Authorization header — KHÔNG cần truyền token thủ công nữa.
+ */
 const guestApiRequest = {
-    /**
-     * POST /order/api/v1/guest/login — AllowAnonymous
-     * Guest chưa có token nên không attach Authorization header.
-     * http.ts tự attach token từ localStorage nhưng guest chưa đăng nhập nên
-     * localStorage sẽ trống → không có header thừa.
-     */
     login: (body: GuestLoginBodyType) =>
-        http.post<GuestLoginResponseType>(
-            '/guest/login',
-            body,
-            { service: 'order' }
-        ),
+        http.post<GuestLoginClientResponseType>('/api/guest-auth/login', body, { baseUrl: '' }),
 
-    /**
-     * POST /order/api/v1/guest/refresh-token — AllowAnonymous
-     */
+    refreshToken: () =>
+        http.post<GuestLoginClientResponseType>('/api/guest-auth/refresh-token', null, { baseUrl: '' }),
 
+    getMyOrders: () =>
+        http.get<GuestOrderListResponseType>('/order/my-orders', { service: 'order' }),
 
-
-    refreshToken: (refreshToken: string) =>
-        http.post<GuestRefreshTokenResponseType>(
-            '/guest/refresh-token',
-            { refreshToken },
-            { service: 'order' }
-        ),
-
-    /**
-     * GET /order/api/v1/order/my-orders — Authorize(Roles = "Guest")
-     * Phải attach Guest JWT thủ công vì http.ts chỉ đọc admin token từ localStorage.
-     * Guest token lưu trong sessionStorage riêng.
-     */
-    getMyOrders: (guestAccessToken: string) =>
-        http.get<GuestOrderListResponseType>(
-            '/order/my-orders',
-            {
-                service: 'order',
-                headers: { Authorization: `Bearer ${guestAccessToken}` }
-            }
-        ),
-
-    /**
-     * GET /order/api/v1/table/{id}number — AllowAnonymous
-     * Lấy tableNumber từ tableId (DB id) — dùng ở welcome page trước khi login.
-     */
     getTablePublic: (tableId: number) =>
         http.get<{ message: string; data: { id: number; number: number; status: string } }>(
             `/table/${tableId}/public`,

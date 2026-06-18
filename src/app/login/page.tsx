@@ -9,7 +9,6 @@ import { Form, FormField, FormItem, FormMessage } from '../../components/ui/form
 import { LoginBodySchema, LoginBodyType } from "../../schema/auth.schema"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { setAccessTokenToLocalStorage, setRefreshTokenToLocalStorage } from "@/src/lib/utils"
 import { useLoginMutation } from "@/src/queries/useAuth"
 import { useAppProviderStore } from "../../components/app-provider"
 
@@ -34,9 +33,8 @@ export default function LoginPage() {
       const res = await loginMutation.mutateAsync(data)
       if (res.payload.data) {
         setIsLoading(false)
-        const { accessToken, refreshToken, account } = res.payload.data;
-        setAccessTokenToLocalStorage(accessToken)
-        setRefreshTokenToLocalStorage(refreshToken)
+        const { account } = res.payload.data;
+        console.log("account", account)
         setRole(account.role)
         toast.success(res.payload.message)
         router.push('/admin')

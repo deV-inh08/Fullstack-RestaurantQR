@@ -24,16 +24,17 @@ const authApiRequest: AuthApiRequest = {
 
 
 
+    // call 
     serverLogin: (body: LoginBodyType) => http.post<LoginResponseType>('/auth/login', body, { service: 'identity' }),
+
+    // cal BFF
     login: (body: LoginBodyType) =>
         http.post<LoginResponseType>('/api/auth/login', body, {
             baseUrl: ''
         }),
 
     serverLogout: (
-        body: LogoutBodyType & {
-            accessToken: string
-        }
+        body
     ) =>
         http.post(
             '/auth/logout',

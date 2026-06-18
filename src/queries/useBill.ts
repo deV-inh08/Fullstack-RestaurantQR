@@ -4,40 +4,36 @@ import type { ConfirmBillBodyType } from '../schema/bill.schema'
 
 export const billKeys = {
     all: ['bills'] as const,
-    list: (page: number, pageSize: number) => ['bills', 'list', page, pageSize] as const,
-    table: (tableId: number) => ['bills', 'table', tableId] as const,
+    byTable: (tableId: number) => ['bills', 'table', tableId] as const,
 }
 
 export const useGetBills = (page = 1, pageSize = 20) =>
     useQuery({
-        queryKey: billKeys.list(page, pageSize),
+        queryKey: [...billKeys.all, page, pageSize],
         queryFn: () => billApiRequest.getAll(page, pageSize),
     })
 
-export const useGetTableBill = (tableId: number, enabled = true) =>
+export const useGetBillByTable = (tableId: number) =>
     useQuery({
-        queryKey: billKeys.table(tableId),
+        queryKey: billKeys.byTable(tableId),
         queryFn: () => billApiRequest.getByTable(tableId),
-        enabled: enabled && tableId > 0,
+        enabled: tableId > 0,
     })
 
+// Không còn nhận guestAccessToken làm tham số — cookie tự động được BFF gắn.
 export const useRequestBillMutation = () => {
-    const qc = useQueryClient()
+    const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (guestAccessToken: string) => billApiRequest.request(guestAccessToken),
-        onSuccess: () => qc.invalidateQueries({ queryKey: billKeys.all }),
+        mutationFn: () => billApiRequest.request(),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: billKeys.all }),
     })
 }
 
 export const useConfirmBillMutation = () => {
-    const qc = useQueryClient()
+    const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: ({ id, ...body }: ConfirmBillBodyType & { id: number }) =>
+        mutationFn: ({ id, body }: { id: number; body: ConfirmBillBodyType }) =>
             billApiRequest.confirm(id, body),
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: billKeys.all })   // bill badge biến mất
-            qc.invalidateQueries({ queryKey: ['orders'] })     // badge số món trên bàn biến mất
-            qc.invalidateQueries({ queryKey: ['tables'] })
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: billKeys.all }),
     })
 }

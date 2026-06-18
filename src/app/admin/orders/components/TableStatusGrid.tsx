@@ -1,9 +1,7 @@
-import { useOrderSignalR } from "@/src/hooks/useOrderSignalR"
-import { cn, getAccessTokenFromLocalStorage } from "@/src/lib/utils"
-import { useGetOrders } from "@/src/queries/useOrder"
-import { useGetTables } from "@/src/queries/useTable"
 import { useQueryClient } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useOrderSignalR } from "@/src/hooks/useOrderSignalR"
+import { cn } from "@/src/lib/utils"
+import { useGetTables } from "@/src/queries/useTable"
 
 export default function TableStatusGrid({
     onSelectTable,
@@ -11,91 +9,38 @@ export default function TableStatusGrid({
     onSelectTable?: (tableId: number) => void
 }) {
     const { data: tablesData } = useGetTables({ page: 1, pageSize: 50 })
-    const { data: ordersData } = useGetOrders({ page: 1, pageSize: 50 })
-
     const tables = tablesData?.payload.data.data ?? []
-    const orders = ordersData?.payload.data.data ?? []
     const queryClient = useQueryClient()
-    const token = getAccessTokenFromLocalStorage()
 
-    useOrderSignalR(
-        token ? {
-            role: 'staff',
-            token,
-            onOrderCreated: () => {
-                queryClient.invalidateQueries({ queryKey: ['orders'] })
-            },
-        } : { role: 'staff', token: null }
-    )
-
-    // Count active (non-cancelled, non-served) orders per table
-    const activeCountByTable = useMemo(() => {
-        const map: Record<number, number> = {}
-        for (const o of orders) {
-            if (o.status !== 'Cancelled' && o.status !== 'Served') {
-                map[o.tableId] = (map[o.tableId] ?? 0) + 1
-            }
-        }
-        return map
-    }, [orders])
-
-    const TABLE_STATUS_STYLES: Record<string, { card: string; badge: string; label: string }> = {
-        Available: {
-            card: 'border-white/10 bg-white/4 hover:border-white/20',
-            badge: 'border border-white/20 text-muted-foreground',
-            label: 'EMPTY',
+    // Không còn getAccessTokenFromLocalStorage() — trang admin đã qua
+    // middleware nên luôn enabled, token thật lấy qua /api/realtime-token.
+    useOrderSignalR({
+        role: 'staff',
+        enabled: true,
+        onOrderCreated: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] })
         },
-        Occupied: {
-            card: 'border-primary/60 bg-primary/5 hover:border-primary',
-            badge: 'bg-primary text-black',
-            label: 'OCCUPIED',
+        onTableStatusChanged: () => {
+            queryClient.invalidateQueries({ queryKey: ['tables'] })
         },
-        Hidden: {
-            card: 'border-white/5 bg-white/2 opacity-60',
-            badge: 'border border-white/10 text-muted-foreground/60',
-            label: 'RESERVED',
-        },
-    }
+    })
 
     return (
-        <section className="mb-8">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                Table Status
-            </h2>
-            <div className="grid grid-cols-5 gap-3 xl:grid-cols-8">
-                {tables.map((table) => {
-                    const count = activeCountByTable[table.id]
-                    const styleCfg = TABLE_STATUS_STYLES[table.status] ?? TABLE_STATUS_STYLES.Available
-
-                    return (
-                        <div
-                            key={table.id}
-                            onClick={() => onSelectTable?.(table.id)}
-                            className={cn(
-                                'relative cursor-pointer rounded-md border p-3 transition-all select-none',
-                                styleCfg.card,
-                            )}
-                        >
-                            {/* Active order badge */}
-                            {count && table.status === 'Occupied' ? (
-                                <span className="absolute -right-1.5 -top-1.5 ...">
-                                    {count}
-                                </span>
-                            ) : null}
-
-                            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                TABLE
-                            </p>
-                            <p className="mb-3 text-2xl font-black text-foreground leading-none">
-                                {table.number}
-                            </p>
-                            <span className={cn('rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider', styleCfg.badge)}>
-                                {styleCfg.label}
-                            </span>
-                        </div>
-                    )
-                })}
-            </div>
-        </section>
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8">
+            {tables.map((table) => (
+                <button
+                    key={table.id}
+                    onClick={() => onSelectTable?.(table.id)}
+                    className={cn(
+                        "rounded-xl border p-3 text-center text-sm font-semibold",
+                        table.status === 'Occupied' && "border-primary bg-primary/10 text-primary",
+                        table.status === 'Available' && "border-foreground/10 text-foreground/60",
+                        table.status === 'Hidden' && "border-foreground/5 text-foreground/30"
+                    )}
+                >
+                    Bàn {table.number}
+                </button>
+            ))}
+        </div>
     )
 }

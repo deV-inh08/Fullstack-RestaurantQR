@@ -12,9 +12,10 @@ import {
   LogOut,
   CalendarDays,
 } from "lucide-react"
-import { cn, removeTokensFromLS } from "@/src/lib/utils"
+import { cn } from "@/src/lib/utils"
 import authApiRequest from "@/src/apiRequests/auth.request"
 import { BillBadge } from "../bill/Billbadge"
+import { useAppProviderStore } from "@/src/components/app-provider"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -28,15 +29,20 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
-  const route = useRouter()
+  const router = useRouter()
+  const setRole = useAppProviderStore((state) => state.setRole)
 
 
   const handleLogout = async () => {
-    await authApiRequest.logout()
-    removeTokensFromLS()
-    localStorage.removeItem('user')
-    localStorage.removeItem('vietgold_reservations')
-    route.push('/')
+    try {
+      await authApiRequest.logout()
+    } finally {
+      // Không còn removeTokensFromLS() — cookie đã được /api/auth/logout
+      // xoá ở server rồi, ở client chỉ cần reset state.
+      setRole(undefined)
+      localStorage.removeItem('vietgold_reservations')
+      router.push('/')
+    }
   }
 
   return (

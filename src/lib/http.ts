@@ -1,20 +1,13 @@
 import HTTP_STATUS from '../constants/http-status'
 import envConfig from '../config'
 import { handleUnauthorized } from '../services/auth.service'
-import { getAccessTokenFromLocalStorage, normalizePath } from './utils'
+import { normalizePath } from './utils'
 
 
 type ServiceName = 'identity' | 'menu' | 'order' | 'reservation'
 type CustomOptions = Omit<RequestInit, 'method'> & {
     baseUrl?: string,
     service?: ServiceName
-}
-
-const SERVICE_BASE_URL: Record<ServiceName, string> = {
-    identity: envConfig.NEXT_PUBLIC_API_IDENTITY,
-    menu: envConfig.NEXT_PUBLIC_API_MENU,
-    order: envConfig.NEXT_PUBLIC_API_ORDER,
-    reservation: envConfig.NEXT_PUBLIC_API_RESERVATION,
 }
 
 
@@ -80,26 +73,16 @@ const request = async <TResponse>(
     const baseHeaders: Record<string, string> = isFormData
         ? {}
         : { 'Content-Type': 'application/json' }
-    // Auto-attach access token when calling backend services directly (cross-origin).
-    // When baseUrl === '' (Next.js route handler), cookies handle auth automatically.
-    const isDirectBackendCall = baseUrl !== ''
-    const accessToken = getAccessTokenFromLocalStorage()
-    const existingAuthHeader = (rawHeaders as Record<string, string>)?.['Authorization']
-
-    if (isDirectBackendCall && accessToken && !existingAuthHeader) {
-        baseHeaders['Authorization'] = `Bearer ${accessToken}`
-    }
-
-    // const resolvedBaseUrl = baseUrl ?? envConfig.NEXT_PUBLIC_API_IDENTITY // Call API Gateway ????
-    const resolvedBaseUrl = baseUrl
-        ?? (options?.service ? SERVICE_BASE_URL[options.service] : envConfig.NEXT_PUBLIC_API_IDENTITY)
 
 
 
+    // Mọi request đều same-origin tới chính Next.js server — KHÔNG còn gọi
+    // thẳng sang microservice, KHÔNG còn tự gắn Bearer token từ localStorage.
+    // httpOnly cookie được browser tự gửi kèm; route handler ở server đọc và
+    // forward Authorization header hộ mình (xem lib/server-fetch.ts).
+    const resolvedBaseUrl = baseUrl ?? (service ? `/api/${service}` : '/api/identity')
     const fullUrl = `${resolvedBaseUrl}/${normalizePath(url)}`
 
-
-    console.log(`fullUrl_______________________: ${fullUrl}`);
     const res = await fetch(fullUrl, {
         ...restFetchOptions,
         headers: { ...baseHeaders, ...(rawHeaders as Record<string, string> ?? {}) },
@@ -124,16 +107,9 @@ const request = async <TResponse>(
         if (res.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
             throw new EntityError(payload as any)
         }
-
-        // if error is UnAuthorized
         if (res.status === HTTP_STATUS.UNAUTHORIZED) {
-            const tokenFromHeader = (rawHeaders as Record<string, string>)
-                ?.['Authorization']
-                ?.split('Bearer ')[1] ?? null
-            await handleUnauthorized?.(tokenFromHeader)
-
+            await handleUnauthorized?.()
         }
-
         throw new HttpError(res.status, payload as any)
     }
 
@@ -143,18 +119,14 @@ const request = async <TResponse>(
 const http = {
     get: <TResponse>(url: string, options?: Omit<CustomOptions, 'body'>) =>
         request<TResponse>('GET', url, { ...options }),
-
     post: <TResponse>(url: string, body: any, options?: Omit<CustomOptions, 'body'>) =>
         request<TResponse>('POST', url, { ...options, body }),
-
     put: <TResponse>(url: string, body: any, options?: Omit<CustomOptions, 'body'>) =>
         request<TResponse>('PUT', url, { ...options, body }),
-
     delete: <TResponse>(url: string, options?: Omit<CustomOptions, 'body'>) =>
         request<TResponse>('DELETE', url, options),
-
     patch: <TResponse>(url: string, body: any, options?: Omit<CustomOptions, 'body'>) =>
-        request<TResponse>('PATCH', url, { ...options, body })
+        request<TResponse>('PATCH', url, { ...options, body }),
 }
 
 export default http
