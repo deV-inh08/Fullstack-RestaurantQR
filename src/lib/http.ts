@@ -46,7 +46,6 @@ const request = async <TResponse>(
     url: string,
     options?: CustomOptions
 ) => {
-    // const { baseUrl, ...restOptions } = options ?? {}
 
     const { baseUrl, service, body: rawBody, headers: rawHeaders, ...restFetchOptions } = options ?? {}
 
