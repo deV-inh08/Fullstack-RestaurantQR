@@ -14,7 +14,7 @@ import { decodedToken } from "@/src/types/token.type"
  */
 export const POST = async (request: Request) => {
     const body = (await request.json()) as LoginBodyType
-
+    console.log("Server body", body)
     const cookieStore = await cookies()
     try {
         const res = await authApiRequest.serverLogin(body)

@@ -80,7 +80,42 @@ const request = async <TResponse>(
     // thẳng sang microservice, KHÔNG còn tự gắn Bearer token từ localStorage.
     // httpOnly cookie được browser tự gửi kèm; route handler ở server đọc và
     // forward Authorization header hộ mình (xem lib/server-fetch.ts).
-    const resolvedBaseUrl = baseUrl ?? (service ? `/api/${service}` : '/api/identity')
+    // Nếu baseURL = '' --> thì gọi đến nextjs server
+    // const resolvedBaseUrl = baseUrl ?? (service ? `/api/${service}` : '/api/identity')
+    // const fullUrl = `${resolvedBaseUrl}/${normalizePath(url)}`
+
+    // ─── Xác định Base URL linh hoạt giữa Client và Server ───────────────────
+    let resolvedBaseUrl = ''
+
+    if (baseUrl !== undefined) {
+        resolvedBaseUrl = baseUrl
+    } else {
+        // 1. Nếu chạy ở môi trường Trình duyệt (Next Client Component)
+        if (typeof window !== 'undefined') {
+            // Client luôn gọi tương đối về Route Handler của Next.js để Browser tự đính Cookie
+            resolvedBaseUrl = service ? `/api/${service}` : '/api/identity'
+        }
+        // 2. Nếu chạy ở môi trường Next.js Server (Route Handler / SSR gọi sang .NET)
+        else {
+            // Sử dụng biến môi trường bảo mật của Server (Server-only), không có chữ NEXT_PUBLIC_
+            const gatewayUrl = process.env.API_GATEWAY_URL
+
+            if (gatewayUrl) {
+                resolvedBaseUrl = gatewayUrl
+            } else {
+                // Phương án dự phòng cực tốt: Nếu không qua Gateway, tự động map sang URL của từng Microservice
+                const serviceMapping: Record<string, string | undefined> = {
+                    identity: process.env.IDENTITY_API_URL,
+                    menu: process.env.MENU_API_URL,
+                    order: process.env.ORDER_API_URL,
+                    reservation: process.env.RESERVATION_API_URL
+                }
+                // Nếu không tìm thấy cấu hình cụ thể nào thì mới fallback về default gateway lúc dev
+                resolvedBaseUrl = serviceMapping[service || 'identity'] || 'http://localhost:5000/api/v1'
+            }
+        }
+    }
+
     const fullUrl = `${resolvedBaseUrl}/${normalizePath(url)}`
 
     const res = await fetch(fullUrl, {

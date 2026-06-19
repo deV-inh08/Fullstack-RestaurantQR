@@ -54,7 +54,7 @@ function AuthBootstrap() {
 function AppProvider({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
-            <AuthBootstrap />
+            {/* <AuthBootstrap /> */}
             {children}
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

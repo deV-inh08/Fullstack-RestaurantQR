@@ -21,7 +21,6 @@ const parsed = serverConfigSchema.safeParse({
     RESERVATION_API_URL: process.env.RESERVATION_API_URL,
 })
 
-console.log(process.env.IDENTITY_API_URL)
 
 if (!parsed.success) {
     console.error(parsed.error)

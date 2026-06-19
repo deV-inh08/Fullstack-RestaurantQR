@@ -29,12 +29,13 @@ export default function LoginPage() {
 
   const handleSubmit = async (data: LoginBodyType) => {
     try {
+      console.log("submit", data)
       setIsLoading(true)
       const res = await loginMutation.mutateAsync(data)
+      console.log("res", res)
       if (res.payload.data) {
         setIsLoading(false)
         const { account } = res.payload.data;
-        console.log("account", account)
         setRole(account.role)
         toast.success(res.payload.message)
         router.push('/admin')
