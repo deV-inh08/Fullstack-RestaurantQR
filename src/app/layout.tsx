@@ -6,6 +6,7 @@ import AppProvider from '../components/app-provider';
 import { Toaster } from '@/src/components/ui/sonner'
 import { ThemeProvider } from '../components/theme-provider'
 import openGraph from "../../public/open_graph.png"
+import NextTopLoader from 'nextjs-toploader';
 
 const _inter = Inter({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -55,6 +56,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground">
         <ThemeProvider>
           <AppProvider>
+            <NextTopLoader showSpinner={false} color="#FFC000"></NextTopLoader>
             {children}
           </AppProvider>
           {process.env.NODE_ENV === 'production' && <Analytics />}
