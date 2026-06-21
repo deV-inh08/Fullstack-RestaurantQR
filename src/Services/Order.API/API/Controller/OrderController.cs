@@ -26,6 +26,7 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> GetMyOrders()
     {
         var (guestId, sessionId) = GetGuestClaims();
+        Console.WriteLine($"guestId, {guestId}");
         var result = await _orderService.GetByGuestAsync(guestId);
         return Ok(new { message = "Get my orders successfully", data = result });
     }

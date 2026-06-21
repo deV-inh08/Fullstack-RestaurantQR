@@ -9,6 +9,7 @@ using Reservation.API.Application.Services;
 using Reservation.API.Infrastructure.Persistence;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Compact;
 using Shared.HealthChecks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -27,14 +28,22 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, services, config) => config
-        .ReadFrom.Configuration(ctx.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Service", "Reservation.API")
-        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-        .WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"));
+    // Serilog configuration
+    builder.Host.UseSerilog((ctx, services, config) =>
+    {
+        config
+            .ReadFrom.Configuration(ctx.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "Reservation.API")
+            .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
+
+        if (ctx.HostingEnvironment.IsProduction())
+            config.WriteTo.Console(new RenderedCompactJsonFormatter());
+        else
+            config.WriteTo.Console(outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+    });
 
     // ─── MongoDB ──────────────────────────────────────
     var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbSettings>()
@@ -168,3 +177,5 @@ finally
 }
 
 return 0;
+
+public partial class Program { }   // ← thêm dòng này

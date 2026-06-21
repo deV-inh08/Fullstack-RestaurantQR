@@ -9,4 +9,10 @@
     <Project Path="src/Services/Order.API/Order.API.csproj" />
     <Project Path="src/Services/Reservation.API/Reservation.API.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Identity.API.Tests/Identity.API.Tests.csproj" />
+    <Project Path="tests/Menu.API.Tests/Menu.API.Tests.csproj" />
+    <Project Path="tests/Order.API.Tests/Order.API.Tests.csproj" />
+    <Project Path="tests/Reservation.API.Tests/Reservation.API.Tests.csproj" />
+  </Folder>
 </Solution>
