@@ -13,7 +13,7 @@ const billApiRequest = {
     request: () => http.post<BillResType>('/bill/request', null, { service: 'order' }),
 
     confirm: (id: number, body: ConfirmBillBodyType) =>
-        http.patch<BillResType>(`/bill/${id}/pay`, body, { service: 'order' }),
+        http.patch<BillResType>(`/bill/${id}/pay`, body, { service: 'guest' }),
 }
 
 export default billApiRequest

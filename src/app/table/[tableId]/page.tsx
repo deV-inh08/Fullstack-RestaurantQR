@@ -81,7 +81,7 @@ export default function GuestTablePage() {
           return http.post(
             '/order',
             { dishSnapshotId: snapshotId, quantity: item.quantity, tableId: tableId },
-            { service: 'order' }
+            { service: 'guest' }
           )
         })
       )

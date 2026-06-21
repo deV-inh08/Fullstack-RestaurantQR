@@ -4,7 +4,7 @@ import { handleUnauthorized } from '../services/auth.service'
 import { normalizePath } from './utils'
 
 
-type ServiceName = 'identity' | 'menu' | 'order' | 'reservation'
+type ServiceName = 'identity' | 'menu' | 'order' | 'reservation' | 'guest'
 type CustomOptions = Omit<RequestInit, 'method'> & {
     baseUrl?: string,
     service?: ServiceName
@@ -107,6 +107,7 @@ const request = async <TResponse>(
                     identity: process.env.IDENTITY_API_URL,
                     menu: process.env.MENU_API_URL,
                     order: process.env.ORDER_API_URL,
+                    guest: process.env.ORDER_API_URL,
                     reservation: process.env.RESERVATION_API_URL
                 }
                 // Nếu không tìm thấy cấu hình cụ thể nào thì mới fallback về default gateway lúc dev

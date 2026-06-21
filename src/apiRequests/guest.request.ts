@@ -21,7 +21,7 @@ const guestApiRequest = {
         http.post<GuestLoginClientResponseType>('/api/guest-auth/refresh-token', null, { baseUrl: '' }),
 
     getMyOrders: () =>
-        http.get<GuestOrderListResponseType>('/order/my-orders', { service: 'order' }),
+        http.get<GuestOrderListResponseType>('/order/my-orders', { service: 'guest' }),
 
     getTablePublic: (tableId: number) =>
         http.get<{ message: string; data: { id: number; number: number; status: string } }>(

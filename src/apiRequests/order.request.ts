@@ -12,7 +12,7 @@ const orderApiRequest = {
 
 
     create: (body: CreateOrderBodyType) =>
-        http.post<OrderResType>('/order', body, { service: 'order' })
+        http.post<OrderResType>('/order', body, { service: 'guest' })
 }
 
 export default orderApiRequest

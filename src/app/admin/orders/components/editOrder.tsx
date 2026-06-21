@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { OrderStatus, STATUS_LABELS, STATUS_STYLES, STATUS_VALUES } from "./status_select";
+import { useEffect, useState } from "react";
+import { OrderStatus, STATUS_LABELS, STATUS_VALUES } from "./status_select";
 import { useUpdateOrderStatusMutation } from "@/src/queries/useOrder";
 import { toast } from "sonner";
 import { handleErrorApi } from "@/src/lib/utils";
@@ -31,7 +31,11 @@ export const EditOrderModal = ({ order, onClose }: { order: OrderDto | null; onC
     const updateStatusMutation = useUpdateOrderStatusMutation()
 
     // Sync state when order changes
-    useMemo(() => { if (order) setStatus(order.status as OrderStatus) }, [order])
+    useEffect(() => {
+        if (order) {
+            setStatus(order.status as OrderStatus)
+        }
+    }, [order])
 
     const handleSave = async () => {
         if (!order) return
