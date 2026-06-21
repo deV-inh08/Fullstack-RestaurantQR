@@ -5,14 +5,27 @@ import './globals.css'
 import AppProvider from '../components/app-provider';
 import { Toaster } from '@/src/components/ui/sonner'
 import { ThemeProvider } from '../components/theme-provider'
+import openGraph from "../../public/open_graph.png"
 
 const _inter = Inter({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Viet Gold - Restaurant QR Ordering',
-  description: 'Vietnamese restaurant QR ordering system with Lamborghini-inspired design',
-  generator: 'v0.app',
+  title: 'Thực Đơn Nhà Hàng Viet Gold | Gọi Món QR',
+  description: 'Khám phá menu đa dạng tại Viet Gold từ Cơm Tấm Sườn Bì Chả đến Nước Ép Trái Cây tươi ngon. Đặt món nhanh qua mã QR tại bàn.',
+  // Open graph
+  openGraph: {
+    title: 'Thực Đơn Nhà Hàng Viet Gold | Gọi Món QR',
+    description: 'Khám phá menu đa dạng tại Viet Gold từ Cơm Tấm Sườn Bì Chả đến Nước Ép Trái Cây tươi ngon. Đặt món nhanh qua mã QR tại bàn.',
+    images: [
+      {
+        url: openGraph.src,
+        width: 1200,
+        height: 630,
+        alt: 'Thực Đơn Nhà Hàng Viet Gold',
+      },
+    ],
+  },
   icons: {
     icon: [
       {
