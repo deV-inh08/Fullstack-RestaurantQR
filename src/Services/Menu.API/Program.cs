@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Compact;
 using Shared.HealthChecks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -27,14 +28,21 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, services, config) => config
-        .ReadFrom.Configuration(ctx.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Service", "Menu.API")
-        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-        .WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"));
+    builder.Host.UseSerilog((ctx, services, config) =>
+    {
+        config
+            .ReadFrom.Configuration(ctx.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "Menu.API")
+            .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
+
+        if (ctx.HostingEnvironment.IsProduction())
+            config.WriteTo.Console(new RenderedCompactJsonFormatter());
+        else
+            config.WriteTo.Console(outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+    });
 
     builder.Services.AddDbContext<MenuDbContext>(options =>
         options.UseSqlServer(
@@ -156,3 +164,5 @@ finally
 }
 
 return 0;
+
+public partial class Program { }   // ← thêm dòng này

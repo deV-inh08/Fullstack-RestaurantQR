@@ -11,8 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Events;
 using Serilog.AspNetCore;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 using Shared.HealthChecks;
 using System.Text;
 using System.Text.Json;
@@ -30,19 +31,22 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // ─── Serilog (full config) ────────────────────────
-    builder.Host.UseSerilog((ctx, services, config) => config
-        .ReadFrom.Configuration(ctx.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Service", "Identity.API")
-        .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName)
-        .WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
-    // Azure: uncommit khi deploy
-    // .WriteTo.ApplicationInsights(services.GetRequiredService<TelemetryConfiguration>(),
-    //     TelemetryConverter.Traces)
-    );
+    // ─── Serilog ──────────────────────────────────────
+    builder.Host.UseSerilog((ctx, services, config) =>
+    {
+        config
+            .ReadFrom.Configuration(ctx.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "Identity.API")
+            .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
+
+        if (ctx.HostingEnvironment.IsProduction())
+            config.WriteTo.Console(new RenderedCompactJsonFormatter()); // JSON cho ACA Log Analytics
+        else
+            config.WriteTo.Console(outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+    });
 
     // ─── EF Core + SQL Server ─────────────────────────
     builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -160,27 +164,30 @@ try
 
     var app = builder.Build();
 
+
     // ─── Migration + Seeding ──────────────────────────
-    using (var scope = app.Services.CreateScope())
+    if (!app.Environment.IsEnvironment("Testing"))   // ← thêm dòng này
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-        dbContext.Database.Migrate();
-
-        if (!await dbContext.Accounts.AnyAsync())
+        using (var scope = app.Services.CreateScope())
         {
-            dbContext.Accounts.Add(new Account
-            {
-                Name = "Super Admin",
-                Email = "superadmin1@restaurant.com",
-                Role = UserRole.SuperAdmin,
-                Password = BCrypt.Net.BCrypt.HashPassword("SuperAdmin1@123678"),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-            });
-            await dbContext.SaveChangesAsync();
-        }
-    }
+            var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            dbContext.Database.Migrate();
 
+            if (!await dbContext.Accounts.AnyAsync())
+            {
+                dbContext.Accounts.Add(new Account
+                {
+                    Name = "Super Admin",
+                    Email = "superadmin1@restaurant.com",
+                    Role = UserRole.SuperAdmin,
+                    Password = BCrypt.Net.BCrypt.HashPassword("SuperAdmin1@123678"),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                });
+                await dbContext.SaveChangesAsync();
+            }
+        }
+    }                                                 // ← đóng if
     // ─── Pipeline ─────────────────────────────────────
     app.UseMiddleware<GlobalExceptionMiddleware>();
 
@@ -228,7 +235,7 @@ try
 }
 catch (Exception ex) when (ex is not HostAbortedException)
 {
-    // Thêm dòng này — ghi thẳng ra stderr, không qua Serilog
+
     Console.Error.WriteLine("=== STARTUP FAILED ===");
     Console.Error.WriteLine(ex.ToString());
     Log.Fatal(ex, "Identity.API terminated unexpectedly");
@@ -240,3 +247,5 @@ finally
 }
 
 return 0;
+
+public partial class Program { }

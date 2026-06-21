@@ -94,9 +94,7 @@ public class OrderService
         await _hub.Clients.Group($"table-{order.Table.Number}").SendAsync("OrderCreated", dto);
 
         return dto;
-
     }
-
 
     public async Task<OrderDto> CreateAsStaffAsync(CreateOrderRequest request)
     {
