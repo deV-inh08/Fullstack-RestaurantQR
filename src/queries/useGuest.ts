@@ -18,11 +18,10 @@ export const useGuestRefreshTokenMutation = () =>
     })
 
 // Không còn nhận guestAccessToken làm tham số — cookie tự động được BFF gắn.
-export const useGetMyOrders = (tableId: string, enabled: boolean) =>
+export const useGetMyOrders = (tableId: string) =>
     useQuery({
         queryKey: guestKeys.myOrders(tableId),
         queryFn: () => guestApiRequest.getMyOrders(),
-        enabled,
     })
 
 export const useGetTablePublic = (tableId: number) =>

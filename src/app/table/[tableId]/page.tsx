@@ -74,11 +74,13 @@ export default function GuestTablePage() {
             `/dish-snapshot/by-dish/${item.dishId}`,
             { service: 'menu' }
           )
+
+          console.log('snapshotRes', snapshotRes)
           const snapshotId = snapshotRes.payload.data.id
 
           return http.post(
             '/order',
-            { dishSnapshotId: snapshotId, quantity: item.quantity },
+            { dishSnapshotId: snapshotId, quantity: item.quantity, tableId: tableId },
             { service: 'order' }
           )
         })
