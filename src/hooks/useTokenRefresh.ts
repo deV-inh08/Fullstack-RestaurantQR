@@ -1,4 +1,3 @@
-// src/hooks/useTokenRefresh.ts
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
@@ -27,8 +26,6 @@ export function useTokenRefresh(bufferSeconds = 30) {
 
         // Đã hết hạn hoặc sắp hết → refresh ngay
         const delay = Math.max(0, (secondsLeft - bufferSeconds) * 1000)
-
-
 
         timerRef.current = setTimeout(async () => {
             try {

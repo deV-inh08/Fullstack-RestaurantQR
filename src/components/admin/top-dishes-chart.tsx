@@ -34,11 +34,11 @@ const chartConfig = {
 export function TopDishesChart() {
   const { data: ordersData, isLoading } = useGetOrders({
     page: 1,
-    pageSize: 10
+    pageSize: 100
   });
 
   // const chartData = useMemo(() => {
-  //   const orders = ordersData?.payload.data ?? []
+  //   const orders = ordersData?.payload.data.data ?? []
 
   //   // Count quantity per dish (exclude cancelled)
   //   const dishCount: Record<string, { name: string; orders: number }> = {}
@@ -62,7 +62,7 @@ export function TopDishesChart() {
           Top Dishes
         </h3>
         <p className="text-sm text-muted-foreground">
-          Món bán chạy nhất (tổng số lượng, trừ đã hủy)
+          Món bán chạy (tổng số lượng, trừ đã hủy)
         </p>
       </div>
       {isLoading ? (

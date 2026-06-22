@@ -40,11 +40,11 @@ const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "S
 export function RevenueChart() {
   const { data: ordersData } = useGetOrders({
     page: 1,
-    pageSize: 10
+    pageSize: 100
   });
 
   // const chartData = useMemo(() => {
-  //   const orders = ordersData?.payload.data ?? []
+  //   const orders = ordersData?.payload.data.data ?? []
 
   //   // Aggregate revenue by month for the current year
   //   const currentYear = new Date().getFullYear()
