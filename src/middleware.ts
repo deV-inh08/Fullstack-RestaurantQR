@@ -43,6 +43,7 @@ export async function middleware(request: NextRequest) {
                 body: JSON.stringify({ refreshToken }),
             })
 
+
             if (!res.ok) {
                 // Refresh token hết hạn hoặc bị revoke
                 // (ChangePassword xóa toàn bộ RT, Logout xóa RT cụ thể)
@@ -54,6 +55,8 @@ export async function middleware(request: NextRequest) {
 
             // Response: { message, data: { accessToken, refreshToken } }
             const json = await res.json()
+            console.log("middleware__res", json.data)
+
             const { accessToken: newAT, refreshToken: newRT } = json.data
 
             const decodedAT = decodeToken(newAT) as { exp: number } | null
@@ -73,6 +76,13 @@ export async function middleware(request: NextRequest) {
                 sameSite: 'lax',
                 path: '/',
                 secure: true,
+            })
+
+            response.cookies.set('atExpiresAt', String(decodedAT?.exp ?? 0), {
+                httpOnly: false,
+                expires: decodedAT?.exp ? new Date(decodedAT.exp * 1000) : undefined,
+                sameSite: 'lax',
+                path: '/',
             })
             return response
 

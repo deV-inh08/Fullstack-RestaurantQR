@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
 import serverConfig from '@/src/config.server'
 import { decodedToken } from '@/src/types/token.type'
+import { setStaffCookiesOnResponse } from '@/src/lib/set-auth-cookies'
 
 export type ServiceName = 'identity' | 'menu' | 'order' | 'reservation' | 'guest'
 type AuthMode = 'staff' | 'guest' | 'none'
@@ -46,16 +47,14 @@ function setAuthCookies(
     })
 }
 
-function clearAuthCookies(
-    res: NextResponse,
-    auth: AuthMode,
-) {
+function clearAuthCookies(res: NextResponse, auth: AuthMode) {
     if (auth === 'guest') {
         res.cookies.delete('guestAccessToken')
         res.cookies.delete('guestRefreshToken')
     } else {
         res.cookies.delete('accessToken')
         res.cookies.delete('refreshToken')
+        res.cookies.delete('atExpiresAt') // ← thêm
     }
 }
 
@@ -65,33 +64,49 @@ function clearAuthCookies(
  * Body:     { refreshToken: string }
  * Response: { message, data: { accessToken, refreshToken } }
  *
- * Lưu ý: Identity.API dùng rotation — xóa token cũ, tạo token mới mỗi lần refresh.
+ *
+ *  Lưu ý: Identity.API dùng rotation — xóa token cũ, tạo token mới mỗi lần refresh.
  */
-async function refreshStaffToken(): Promise<{
-    accessToken: string
-    refreshToken: string
-} | null> {
-    const cookieStore = await cookies()
-    const refreshToken = cookieStore.get('refreshToken')?.value
-    if (!refreshToken) return null
 
-    try {
-        const res = await fetch(
-            `${serverConfig.IDENTITY_API_URL}/auth/refresh-token`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken }),
-            }
-        )
-        if (!res.ok) return null
+// Module-level deduplication (shared trong cùng 1 Node.js process)
+let staffRefreshPromise: Promise<{ accessToken: string; refreshToken: string } | null> | null = null
+let guestRefreshPromise: Promise<{ accessToken: string; refreshToken: string } | null> | null = null
 
-        const json = await res.json()
-        // json.data = { accessToken, refreshToken }
-        return json?.data ?? null
-    } catch {
-        return null
+
+async function refreshStaffToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
+    // Nếu đang có refresh đang chạy → chờ kết quả đó thay vì tạo mới
+    if (staffRefreshPromise) {
+        return staffRefreshPromise
     }
+
+    staffRefreshPromise = (async () => {
+        const cookieStore = await cookies()
+        const refreshToken = cookieStore.get('refreshToken')?.value
+        if (!refreshToken) return null
+
+        try {
+            const res = await fetch(
+                `${serverConfig.IDENTITY_API_URL}/auth/refresh-token`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken }),
+                }
+            )
+
+            console.log("refreshtoken__________res", res)
+            if (!res.ok) return null
+            const json = await res.json()
+            return json?.data ?? null
+        } catch {
+            return null
+        } finally {
+            // Reset sau khi xong để lần tiếp theo có thể refresh lại
+            staffRefreshPromise = null
+        }
+    })()
+
+    return staffRefreshPromise
 }
 
 /**
@@ -103,37 +118,40 @@ async function refreshStaffToken(): Promise<{
  * Lưu ý: Guest token không lưu DB — validate bằng JWT signature + sessionId.
  * Nếu Staff reset bàn → sessionId đổi → refresh token từ chối dù còn hạn.
  */
-async function refreshGuestToken(): Promise<{
-    accessToken: string
-    refreshToken: string
-} | null> {
-    const cookieStore = await cookies()
-    const refreshToken = cookieStore.get('guestRefreshToken')?.value
-    if (!refreshToken) return null
-
-    try {
-        const res = await fetch(
-            `${serverConfig.ORDER_API_URL}/guest/refresh-token`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken }),
-            }
-        )
-        if (!res.ok) return null
-
-        const json = await res.json()
-        // json.data = { guest, accessToken, refreshToken }
-        // Chỉ cần accessToken + refreshToken, bỏ qua guest object
-        const { accessToken, refreshToken: newRT } = json?.data ?? {}
-        if (!accessToken || !newRT) return null
-
-        return { accessToken, refreshToken: newRT }
-    } catch {
-        return null
+// Tương tự cho refreshGuestToken
+async function refreshGuestToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
+    if (guestRefreshPromise) {
+        return guestRefreshPromise
     }
-}
 
+    guestRefreshPromise = (async () => {
+        const cookieStore = await cookies()
+        const refreshToken = cookieStore.get('guestRefreshToken')?.value
+        if (!refreshToken) return null
+
+        try {
+            const res = await fetch(
+                `${serverConfig.ORDER_API_URL}/guest/refresh-token`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken }),
+                }
+            )
+            if (!res.ok) return null
+            const json = await res.json()
+            const { accessToken, refreshToken: newRT } = json?.data ?? {}
+            if (!accessToken || !newRT) return null
+            return { accessToken, refreshToken: newRT }
+        } catch {
+            return null
+        } finally {
+            guestRefreshPromise = null
+        }
+    })()
+
+    return guestRefreshPromise
+}
 async function toNextResponse(upstream: Response): Promise<NextResponse> {
     const contentType = upstream.headers.get('content-type') ?? 'application/json'
     return new NextResponse(upstream.body, {
@@ -216,21 +234,36 @@ export async function proxyRequest(
         const refreshFn = entry.auth === 'guest' ? refreshGuestToken : refreshStaffToken
         const refreshed = await refreshFn()
 
+        // if (refreshed) {
+        //     // Retry với token mới
+        //     upstream = await doFetch(refreshed.accessToken)
+        //     const finalRes = await toNextResponse(upstream)
+
+        //     // Set cookie mới vào response để browser cập nhật
+        //     setAuthCookies(
+        //         finalRes,
+        //         entry.auth === 'guest' ? 'guestAccessToken' : 'accessToken',
+        //         entry.auth === 'guest' ? 'guestRefreshToken' : 'refreshToken',
+        //         refreshed.accessToken,
+        //         refreshed.refreshToken,
+        //     )
+        //     return finalRes
+        // }
+
         if (refreshed) {
-            // Retry với token mới
             upstream = await doFetch(refreshed.accessToken)
             const finalRes = await toNextResponse(upstream)
 
-            // Set cookie mới vào response để browser cập nhật
-            setAuthCookies(
-                finalRes,
-                entry.auth === 'guest' ? 'guestAccessToken' : 'accessToken',
-                entry.auth === 'guest' ? 'guestRefreshToken' : 'refreshToken',
-                refreshed.accessToken,
-                refreshed.refreshToken,
-            )
+            if (entry.auth === 'guest') {
+                // guest vẫn giữ nguyên cách cũ
+                setAuthCookies(finalRes, 'guestAccessToken', 'guestRefreshToken',
+                    refreshed.accessToken, refreshed.refreshToken)
+            } else {
+                setStaffCookiesOnResponse(finalRes, refreshed) // ← dùng helper mới
+            }
             return finalRes
         }
+
 
         // Refresh thất bại → session chết hoàn toàn, xóa cookie cũ
         // Phía client sẽ nhận 401 → auth.service.ts redirect về /login hoặc /welcome

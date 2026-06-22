@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import jwt from 'jsonwebtoken'
 import { HttpError } from "@/src/lib/http"
 import { decodedToken } from "@/src/types/token.type"
+import { setStaffCookies } from "@/src/lib/set-auth-cookies"
 /**
  * Flow: Next client -> Next Server(proxy) -> Main Server
  * 
@@ -19,23 +20,25 @@ export const POST = async (request: Request) => {
     try {
         const res = await authApiRequest.serverLogin(body)
         const { accessToken, refreshToken } = res.payload.data
-        const decodedAccessToken = jwt.decode(accessToken) as decodedToken
-        const decodedRefreshToken = jwt.decode(refreshToken) as decodedToken
-        cookieStore.set('accessToken', accessToken, {
-            httpOnly: true,
-            expires: new Date(decodedAccessToken.exp * 1000),
-            sameSite: 'lax',
-            path: '/',
-            secure: true
+        // const decodedAccessToken = jwt.decode(accessToken) as decodedToken
+        // const decodedRefreshToken = jwt.decode(refreshToken) as decodedToken
+        // cookieStore.set('accessToken', accessToken, {
+        //     httpOnly: true,
+        //     expires: new Date(decodedAccessToken.exp * 1000),
+        //     sameSite: 'lax',
+        //     path: '/',
+        //     secure: true
 
-        })
-        cookieStore.set('refreshToken', refreshToken, {
-            httpOnly: true,
-            expires: new Date(decodedRefreshToken.exp * 1000),
-            sameSite: 'lax',
-            path: '/',
-            secure: true
-        })
+        // })
+        // cookieStore.set('refreshToken', refreshToken, {
+        //     httpOnly: true,
+        //     expires: new Date(decodedRefreshToken.exp * 1000),
+        //     sameSite: 'lax',
+        //     path: '/',
+        //     secure: true
+        // })
+
+        await setStaffCookies({ accessToken, refreshToken })
         return Response.json(res.payload)
     } catch (error) {
         if (error instanceof HttpError) {

@@ -22,6 +22,7 @@ export const POST = async (request: NextRequest) => {
         const res = await authApiRequest.serverLogout({ accessToken: accessToken.trim(), refreshToken: refreshToken.trim() })
         cookieStore.delete('accessToken')
         cookieStore.delete('refreshToken')
+        cookieStore.delete('atExpiresAt')
         return Response.json(res.payload, {
             status: 200
         })
