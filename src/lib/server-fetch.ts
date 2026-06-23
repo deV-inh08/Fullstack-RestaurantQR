@@ -208,6 +208,7 @@ export async function proxyRequest(
     const bodyBuffer = hasBody ? await request.arrayBuffer() : undefined
 
     const doFetch = (bearer: string | null) => {
+        console.log("doFetch__________________", targetUrl)
         const headers = new Headers()
         request.headers.forEach((value, key) => {
             if (!HOP_BY_HOP.has(key.toLowerCase())) headers.set(key, value)
@@ -225,8 +226,14 @@ export async function proxyRequest(
     }
 
     // ── Initial request ──────────────────────────────────────────────────────
-    let upstream = await doFetch(token)
-
+    let upstream: Response
+    try {
+        upstream = await doFetch(token)
+        console.log('upstream status:', upstream.status)
+    } catch (err) {
+        console.error('🔥 fetch failed:', err)
+        return NextResponse.json({ message: 'fetch failed' }, { status: 500 })
+    }
     // ── Silent refresh khi 401 ───────────────────────────────────────────────
     // FIX: bỏ `&& token` — refresh cả khi cookie accessToken đã hết hạn/bị xóa.
     // `entry.auth !== 'none'` đảm bảo không retry cho public endpoints.
