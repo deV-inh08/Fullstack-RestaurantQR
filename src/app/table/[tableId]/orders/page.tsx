@@ -44,7 +44,6 @@ export default function GuestOrdersPage() {
   // gắn vào request.
   const { data, isLoading, error } = useGetMyOrders(tableNumber)
 
-  console.log("dataGetOrders", data)
 
   useEffect(() => {
     if ((error as any)?.status === 401) {
@@ -79,7 +78,6 @@ export default function GuestOrdersPage() {
 
   const orders = data?.payload.data ?? []
 
-  console.log("orders", orders)
 
   return (
     <div className="flex min-h-screen flex-col pb-32">

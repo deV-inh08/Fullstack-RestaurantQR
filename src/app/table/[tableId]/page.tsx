@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -12,6 +12,19 @@ import { useGetDishes } from '@/src/queries/useDish'
 import { DishDto } from '@/src/schema/dish.schema'
 
 type CartItem = { dishId: number; name: string; price: number; quantity: number }
+const CATEGORY_ORDER = ['Beverage', 'MainCourse', 'Dessert', 'Other'] as const
+
+const CATEGORY_LABEL: Record<string, string> = {
+  Beverage: 'Nước',
+  MainCourse: 'Món chính',
+  Dessert: 'Tráng miệng',
+  Other: 'Khác',
+}
+
+function getCategoryKey(dish: DishDto): string {
+  const cat = (dish as any).category as string | undefined
+  return cat && CATEGORY_LABEL[cat] ? cat : 'Other'
+}
 
 export default function GuestTablePage() {
   const params = useParams()
@@ -19,6 +32,7 @@ export default function GuestTablePage() {
   const tableId = Number(params.tableId)
   const guestInfo = getGuestInfo()
 
+  const [activeCategory, setActive] = useState<string>('')
   const [cart, setCart] = useState<CartItem[]>([])
   // Chưa đăng nhập → về trang welcome
   useEffect(() => {
@@ -33,8 +47,28 @@ export default function GuestTablePage() {
     (d) => d.status === 'Available'
   )
 
+  // Group dishes by category
+  const grouped = dishes.reduce<Record<string, DishDto[]>>((acc, dish) => {
+    const key = getCategoryKey(dish)
+      ; (acc[key] ??= []).push(dish)
+    return acc
+  }, {})
+
+  const categoryKeys = CATEGORY_ORDER.filter((k) => grouped[k]?.length)
+
+  // Auto-select first category once data loads
+  useEffect(() => {
+    if (categoryKeys.length && !activeCategory) setActive(categoryKeys[0])
+  }, [categoryKeys.join(',')])
+
+  // Dishes shown = only the active category
+  const visibleDishes = grouped[activeCategory] ?? []
+
+
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0)
   const totalPrice = cart.reduce((s, i) => s + i.price * i.quantity, 0)
+
+
 
   // ─── Cart helpers ──────────────────────────────────────────────────────
   const getQty = (dishId: number) =>
@@ -75,7 +109,6 @@ export default function GuestTablePage() {
             { service: 'menu' }
           )
 
-          console.log('snapshotRes', snapshotRes)
           const snapshotId = snapshotRes.payload.data.id
 
           return http.post(
@@ -109,26 +142,62 @@ export default function GuestTablePage() {
         </h1>
       </header>
 
-      {/* Danh sách món + thêm vào cart giữ nguyên UI cũ — phần quan trọng
-               về kiến trúc là orderMutation phía trên. */}
-      {/* Danh sách món */}
+
+      {/* Category tabs — filter, not scroll */}
+      {!isLoading && categoryKeys.length > 0 && (
+        <div className="sticky top-[52px] z-10 border-b border-foreground/8 bg-background/90 backdrop-blur-sm">
+          <div className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categoryKeys.map((key) => {
+              const isActive = activeCategory === key
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActive(key)}
+                  className={[
+                    'flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium',
+                    'whitespace-nowrap transition-all duration-150 active:scale-95',
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-foreground/6 text-foreground/70 hover:bg-foreground/10',
+                  ].join(' ')}
+                >
+                  {CATEGORY_LABEL[key] ?? key}
+                  <span
+                    className={[
+                      'rounded-full px-1.5 text-[10px] font-semibold tabular-nums',
+                      isActive
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : 'bg-foreground/10 text-foreground/50',
+                    ].join(' ')}
+                  >
+                    {grouped[key].length}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+
+      {/* Dish list — only active category */}
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : dishes.length === 0 ? (
+      ) : visibleDishes.length === 0 ? (
         <div className="flex flex-1 items-center justify-center text-sm text-foreground/50">
           Hiện chưa có món nào
         </div>
       ) : (
         <ul className="divide-y divide-foreground/8 px-4">
-          {dishes.map((dish) => {
+          {visibleDishes.map((dish) => {
             const qty = getQty(dish.id)
             return (
               <li key={dish.id} className="flex items-center gap-3 py-4">
-                {/* Ảnh */}
+
                 {dish.imagePath && (
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-foreground/5">
                     <img
                       src={handleImageURL(dish.imagePath) ?? ''}
                       alt={dish.name}
@@ -137,7 +206,6 @@ export default function GuestTablePage() {
                   </div>
                 )}
 
-                {/* Info */}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{dish.name}</p>
                   {dish.description && (
@@ -150,30 +218,32 @@ export default function GuestTablePage() {
                   </p>
                 </div>
 
-                {/* +/− controls */}
                 <div className="flex shrink-0 items-center gap-2">
                   {qty > 0 ? (
                     <>
                       <button
+                        aria-label="Bớt một"
                         onClick={() => removeFromCart(dish.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 text-foreground/70 transition-colors active:scale-95"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 text-foreground/70 active:scale-95"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
-                      <span className="w-5 text-center text-sm font-bold">
+                      <span className="w-5 text-center text-sm font-bold tabular-nums">
                         {qty}
                       </span>
                       <button
+                        aria-label="Thêm một"
                         onClick={() => addToCart(dish)}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity active:scale-95"
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
                     </>
                   ) : (
                     <button
+                      aria-label={`Thêm ${dish.name}`}
                       onClick={() => addToCart(dish)}
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity active:scale-95"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95"
                     >
                       <Plus className="h-3 w-3" />
                     </button>

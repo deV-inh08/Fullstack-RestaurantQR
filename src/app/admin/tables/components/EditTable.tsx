@@ -43,7 +43,7 @@ export const EditTableModal = ({ table, onClose }: { table: TableDto | null; onC
     }, [table])
 
     const url = table ? `${envConfig.NEXT_PUBLIC_URL}/table/${table.id}/welcome` : ''
-
+    console.log('url_____________________', url)
     const handleSave = async () => {
         if (!table) return
         try {
