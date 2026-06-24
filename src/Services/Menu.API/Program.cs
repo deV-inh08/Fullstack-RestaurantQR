@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Menu.API.API.Middleware;
 using Menu.API.Application.Services;
 using Menu.API.Infrastructure.Persistence;
@@ -28,6 +29,10 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+
+    builder.Services.AddOpenTelemetry()
+    .UseAzureMonitor();
+
     builder.Host.UseSerilog((ctx, services, config) =>
     {
         config
@@ -38,7 +43,11 @@ try
             .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
 
         if (ctx.HostingEnvironment.IsProduction())
-            config.WriteTo.Console(new RenderedCompactJsonFormatter());
+            config
+                .WriteTo.Console(new RenderedCompactJsonFormatter())
+                .WriteTo.ApplicationInsights(
+                ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+                TelemetryConverter.Traces);
         else
             config.WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
@@ -120,6 +129,7 @@ try
     {
         var db = scope.ServiceProvider.GetRequiredService<MenuDbContext>();
         db.Database.Migrate();
+        await DatabaseSeeder.SeedAsync(db);
     }
 
     app.UseMiddleware<GlobalExceptionMiddleware>();

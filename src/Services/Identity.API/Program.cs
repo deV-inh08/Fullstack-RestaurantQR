@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Identity.API.API.Middleware;
 using Identity.API.Application.Interfaces;
 using Identity.API.Application.Services;
@@ -31,6 +32,10 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+
+    builder.Services.AddOpenTelemetry()
+    .UseAzureMonitor();
+
     // ─── Serilog ──────────────────────────────────────
     builder.Host.UseSerilog((ctx, services, config) =>
     {
@@ -42,7 +47,12 @@ try
             .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
 
         if (ctx.HostingEnvironment.IsProduction())
-            config.WriteTo.Console(new RenderedCompactJsonFormatter()); // JSON cho ACA Log Analytics
+            config
+            .WriteTo.Console(new RenderedCompactJsonFormatter()) // JSON cho ACA Log Analytics
+            .WriteTo.ApplicationInsights(
+                ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+                TelemetryConverter.Traces);
+
         else
             config.WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
@@ -163,6 +173,7 @@ try
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
+
 
 
     // ─── Migration + Seeding ──────────────────────────

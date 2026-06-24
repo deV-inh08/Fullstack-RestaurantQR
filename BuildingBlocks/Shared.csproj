@@ -8,5 +8,7 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.*" />
+		<PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.*" />
 	</ItemGroup>
 </Project>

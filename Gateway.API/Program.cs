@@ -1,6 +1,11 @@
 using System.Threading.RateLimiting;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddOpenTelemetry()
+.UseAzureMonitor();
 
 // ─── YARP Reverse Proxy ───────────────────────────────────────────────────────
 builder.Services.AddReverseProxy()

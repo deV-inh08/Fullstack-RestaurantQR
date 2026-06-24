@@ -1,10 +1,11 @@
-using Order.API.Hubs;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Order.API.API.Middleware;
 using Order.API.Application.Interfaces;
 using Order.API.Application.Service;
+using Order.API.Hubs;
 using Order.API.Infrastructure.ExternalServices;
 using Order.API.Infrastructure.Persistence;
 using Order.API.Infrastructure.Utils;
@@ -32,6 +33,10 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+
+    builder.Services.AddOpenTelemetry()
+    .UseAzureMonitor();
+
     // ─── Serilog ──────────────────────────────────────
     builder.Host.UseSerilog((ctx, services, config) =>
     {
@@ -43,7 +48,11 @@ try
             .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
 
         if (ctx.HostingEnvironment.IsProduction())
-            config.WriteTo.Console(new RenderedCompactJsonFormatter());
+            config
+                .WriteTo.Console(new RenderedCompactJsonFormatter())
+                .WriteTo.ApplicationInsights(
+                ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+                TelemetryConverter.Traces);
         else
             config.WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
