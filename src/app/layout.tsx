@@ -59,12 +59,12 @@ export default function RootLayout({
         <ThemeProvider>
           <AppProvider>
             <NextTopLoader showSpinner={false} color="#FFC000"></NextTopLoader>
+            <GoogleAnalytics gaId={gaId} />
             {children}
           </AppProvider>
           <Analytics />
           <Toaster />
         </ThemeProvider>
-        <GoogleAnalytics gaId={gaId} />
       </body>
     </html>
   )

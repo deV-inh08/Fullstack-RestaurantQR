@@ -117,7 +117,6 @@ const request = async <TResponse>(
     }
 
     const fullUrl = `${resolvedBaseUrl}/${normalizePath(url)}`
-    console.log("fullUrl.............................", fullUrl)
 
     const res = await fetch(fullUrl, {
         ...restFetchOptions,
