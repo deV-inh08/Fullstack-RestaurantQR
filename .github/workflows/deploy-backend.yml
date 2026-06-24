@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/**'
-      - 'Gateway.API/**'
-      - 'BuildingBlocks/**'
+      - "src/**"
+      - "Gateway.API/**"
+      - "BuildingBlocks/**"
 
 env:
   ACR: restaurantqracr.azurecr.io
-  RG:  RestaurantQR-RG
+  RG: RestaurantQR-RG
 
 jobs:
   deploy:
@@ -43,7 +43,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Login to ACR
-        run: az acr login --name restaurantqracr
+        uses: docker/login-action@v3
+        with:
+          registry: restaurantqracr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build & push image
         run: |
