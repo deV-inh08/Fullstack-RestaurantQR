@@ -13,7 +13,24 @@ env:
   RG: RestaurantQR-RG
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build # ← tách build ra
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test --no-build --no-restore --verbosity normal
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
