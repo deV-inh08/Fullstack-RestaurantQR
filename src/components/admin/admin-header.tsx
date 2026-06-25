@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 import { NotificationBell } from "./NotificationBellAdmin"
 import { useGetMe } from "@/src/queries/useAccount"
+import Link from "next/link"
 
 interface AdminHeaderProps {
   title: string
@@ -31,7 +32,7 @@ function AdminHeaderInner({ title, subtitle }: AdminHeaderProps) {
       <div className="flex items-center gap-4">
         <NotificationBell />
 
-        <div className="flex items-center gap-3 border-l border-border-subtle pl-4">
+        <Link href="/admin/setting" className="flex items-center gap-3 border-l border-border-subtle pl-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
             <span className="text-xs font-bold text-primary-foreground">
               {me?.name ? getInitials(me.name) : "AD"}
@@ -45,7 +46,7 @@ function AdminHeaderInner({ title, subtitle }: AdminHeaderProps) {
               {me?.email ?? "—"}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   )
