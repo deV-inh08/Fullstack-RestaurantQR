@@ -16,12 +16,10 @@ import { cn, formatCurrency, formatTime } from "@/src/lib/utils"
 import { OrderStatus, STATUS_LABELS, STATUS_STYLES } from "./orders/components/status_select"
 
 export default function AdminDashboard() {
-  const { data: ordersData, isLoading: ordersLoading } = useGetOrders({ page: 1, pageSize: 5 })
+  const { data: ordersData, isLoading: ordersLoading } = useGetOrders({ page: 1, pageSize: 100 })
   const { data: tablesData, isLoading: tablesLoading } = useGetTables({ page: 1, pageSize: 5 })
 
 
-  console.log("tablesData____________________", tablesData)
-  console.log("ordersData___________________", ordersData)
   const orders = ordersData?.payload.data.data ?? []
   const tables = tablesData?.payload.data.data ?? []
 
@@ -53,6 +51,7 @@ export default function AdminDashboard() {
       activeOrders: activeOrders.length,
     }
   }, [orders, tables])
+
 
   // ─── Recent orders (top 5, most recent first) ─────────────────────────────
   const recentOrders = useMemo(
