@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useGetDishes } from "../queries/useDish"
 import { handleImageURL } from "@/src/lib/utils"
 import QRScannerModal from "@/src/components/admin/QRscanner"
+import LoadingScreen from "@/src/app/[locale]/loading"
 
 // ─── Hook detect mobile ───────────────────────────────────────────────────────
 function useIsMobile(breakpoint = 768) {
@@ -21,13 +22,15 @@ function useIsMobile(breakpoint = 768) {
 
 export default function HomePage() {
   const router = useRouter()
-  const { data } = useGetDishes()
+  const { data, isLoading } = useGetDishes()
   const [showScanner, setShowScanner] = useState(false)
   const isMobile = useIsMobile()
 
   const featuredDishes = (data?.payload.data.data ?? [])
     .filter((d) => d.status === "Available")
     .slice(0, 3)
+
+  if (isLoading) return <LoadingScreen />
 
   return (
     <div style={{ backgroundColor: "#0D0B08", color: "#F5F0E8" }}>
