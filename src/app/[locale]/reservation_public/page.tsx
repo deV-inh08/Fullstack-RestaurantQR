@@ -307,7 +307,7 @@ export default function ReservationPage() {
               <div>
                 <div style={{ fontSize: 10, color: '#8A7F72', letterSpacing: '0.1em' }}>{t('selectedTableLabel')}</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F0E8' }}>
-                  {t('selectedTableSummary', { number: selectedTable.number, capacity: selectedTable.capacity })}
+                  {t('selectedTableSummary', { numbers: `${selectedTable.number}`, capacity: selectedTable.capacity })}
                 </div>
               </div>
             </div>
