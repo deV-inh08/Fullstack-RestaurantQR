@@ -299,6 +299,13 @@
       "empty": "No orders yet",
       "viewDetails": "View details",
       "editStatus": "Edit status",
+      "group": {
+        "itemsCount": "{count} items",
+        "collapseAria": "Collapse group",
+        "expandAria": "Expand group",
+        "updateAllPlaceholder": "Update all...",
+        "updateAllSuccess": "Updated {count} item(s) to {status}"
+      },
       "editModal": {
         "title": "Update order #{id}",
         "table": "Table",

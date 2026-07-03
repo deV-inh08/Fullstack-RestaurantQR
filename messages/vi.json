@@ -299,6 +299,13 @@
       "empty": "Không có đơn hàng nào",
       "viewDetails": "Xem chi tiết",
       "editStatus": "Chỉnh sửa trạng thái",
+      "group": {
+        "itemsCount": "{count} món",
+        "collapseAria": "Thu gọn nhóm",
+        "expandAria": "Mở rộng nhóm",
+        "updateAllPlaceholder": "Cập nhật tất cả...",
+        "updateAllSuccess": "Đã cập nhật {count} món → {status}"
+      },
       "editModal": {
         "title": "Cập nhật đơn #{id}",
         "table": "Bàn",

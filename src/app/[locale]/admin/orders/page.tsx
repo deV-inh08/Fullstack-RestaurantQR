@@ -19,16 +19,15 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/src/components/ui/table"
 
-import { Eye, Pencil, Plus } from "lucide-react"
-import { cn, formatCurrency, formatTime } from "@/src/lib/utils"
+import { ChevronDown, ChevronRight, Eye, Pencil, Plus } from "lucide-react"
+import { toast } from "sonner"
+import { cn, formatCurrency, formatTime, handleErrorApi } from "@/src/lib/utils"
 import PaginationV1 from "@/src/components/pagination/pagination_v1"
-import { useGetOrders, orderKeys } from "@/src/queries/useOrder"
-import { STATUS_VALUES } from "./components/status_select"
+import { useGetOrders, useUpdateOrderStatusMutation, orderKeys } from "@/src/queries/useOrder"
+import { OrderStatus, STATUS_VALUES, useOrderStatusLabels } from "./components/status_select"
 import CreateOrderModal from "./components/addOrder"
 import { StatusBadge, ViewOrderModal, useOrderStatusBadgeConfig } from "./components/viewModel"
 import { EditOrderModal } from "./components/editOrder"
@@ -37,6 +36,47 @@ import TableStatusGrid from "./components/TableStatusGrid"
 import { OrderRowSkeleton } from "@/src/components/Skeleton/skeleton"
 import BillAdminRequestSection from "@/src/components/bill/BillAdminRequestSection"
 import { PAGE_SIZE } from "@/src/config"
+
+// ─── Grouping: gom các dòng order theo bàn + khách (cùng 1 lượt gọi món) ─────
+type OrderGroup = {
+  key: string
+  tableId: number
+  tableNumber: number
+  guestId: number
+  guestName: string
+  items: OrderDto[]
+  total: number
+  latestCreatedAt: string
+}
+
+function groupOrders(orders: OrderDto[]): OrderGroup[] {
+  const map = new Map<string, OrderGroup>()
+  for (const o of orders) {
+    const key = `${o.tableId}-${o.guestId}`
+    const existing = map.get(key)
+    if (existing) {
+      existing.items.push(o)
+      existing.total += o.dishPrice ? o.dishPrice * o.quantity : 0
+      if (new Date(o.createdAt) > new Date(existing.latestCreatedAt)) {
+        existing.latestCreatedAt = o.createdAt
+      }
+    } else {
+      map.set(key, {
+        key,
+        tableId: o.tableId,
+        tableNumber: o.tableNumber,
+        guestId: o.guestId,
+        guestName: o.guestName,
+        items: [o],
+        total: o.dishPrice ? o.dishPrice * o.quantity : 0,
+        latestCreatedAt: o.createdAt,
+      })
+    }
+  }
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.latestCreatedAt).getTime() - new Date(a.latestCreatedAt).getTime()
+  )
+}
 
 // ─── Main page ──────────────────────────────────────
 export default function OrdersPage() {
@@ -50,6 +90,9 @@ export default function OrdersPage() {
 function OrdersContent() {
   const t = useTranslations("Admin.Orders")
   const statusBadgeConfig = useOrderStatusBadgeConfig()
+  const statusLabels = useOrderStatusLabels()
+  const updateStatusMutation = useUpdateOrderStatusMutation()
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -106,6 +149,28 @@ function OrdersContent() {
       return matchStatus && matchFrom && matchTo
     })
   }, [data, statusFilter, dateFrom, dateTo])
+
+  const groups = useMemo(() => groupOrders(orders), [orders])
+
+  const toggleGroup = (key: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const handleBulkStatusChange = async (group: OrderGroup, status: OrderStatus) => {
+    try {
+      await Promise.all(
+        group.items.map(item => updateStatusMutation.mutateAsync({ id: item.id, status }))
+      )
+      toast.success(t("group.updateAllSuccess", { count: group.items.length, status: statusLabels[status] }))
+    } catch (error) {
+      handleErrorApi({ error })
+    }
+  }
 
   const total = data?.payload.data.total
   const pagination = {
@@ -175,59 +240,105 @@ function OrdersContent() {
                 </div>
                 <OrderRowSkeleton rows={8} />
               </div>
+            ) : groups.length === 0 ? (
+              <div className="py-16 text-center text-muted-foreground">{t("empty")}</div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border-subtle hover:bg-transparent">
-                    {[t("columns.orderId"), t("columns.table"), t("columns.guest"), t("columns.items"), t("columns.total"), t("columns.status"), t("columns.time"), t("columns.actions")].map(h => (
-                      <TableHead key={h} className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{h}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="py-16 text-center text-muted-foreground">
-                        {t("empty")}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {orders.map(order => (
-                    <TableRow key={order.id} className="border-border-subtle transition-colors hover:bg-gold-subtle/20">
-                      <TableCell className="font-mono font-bold text-foreground">
-                        ORD-{String(order.id).padStart(3, '0')}
-                      </TableCell>
-                      <TableCell className="text-foreground">{t("columns.table")} {order.tableNumber}</TableCell>
-                      <TableCell className="text-muted-foreground">{order.guestName}</TableCell>
-                      <TableCell className="text-foreground">
-                        {order.dishName ?? `Snapshot #${order.dishSnapshotId}`}
-                      </TableCell>
-                      <TableCell className="font-bold text-primary">{getTotal(order)}</TableCell>
-                      <TableCell><StatusBadge status={order.status} /></TableCell>
-                      <TableCell className="text-muted-foreground text-sm tabular-nums">{formatTime(order.createdAt)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setOrderToView(order)}
-                            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-gold-subtle hover:text-foreground"
-                            title={t("viewDetails")}
+              <div className="divide-y divide-border-subtle">
+                {groups.map(group => {
+                  const isCollapsed = collapsedGroups.has(group.key)
+                  return (
+                    <div key={group.key}>
+                      {/* ── Group header: bàn + khách, tổng quan, cập nhật hàng loạt ── */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 bg-surface/40 px-4 py-3">
+                        <button
+                          onClick={() => toggleGroup(group.key)}
+                          className="flex items-center gap-2 text-left"
+                          aria-label={isCollapsed ? t("group.expandAria") : t("group.collapseAria")}
+                        >
+                          {isCollapsed ? (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <span className="font-bold text-foreground">
+                            {t("columns.table")} {group.tableNumber}
+                          </span>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="text-muted-foreground">{group.guestName}</span>
+                        </button>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {t("group.itemsCount", { count: group.items.length })}
+                          </span>
+                          <span className="font-bold text-primary">{formatCurrency(group.total)}</span>
+                          <span className="text-muted-foreground text-sm tabular-nums">
+                            {formatTime(group.latestCreatedAt)}
+                          </span>
+                          <Select
+                            value=""
+                            onValueChange={(v) => handleBulkStatusChange(group, v as OrderStatus)}
                           >
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setOrderToEdit(order)}
-                            disabled={order.status === 'Cancelled'}
-                            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-gold-subtle hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                            title={t("editStatus")}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
+                            <SelectTrigger className="h-8 w-40 rounded-md border-input-border bg-input text-xs text-foreground focus:ring-0">
+                              <SelectValue placeholder={t("group.updateAllPlaceholder")} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-md border-border-subtle bg-surface">
+                              {STATUS_VALUES.map(s => (
+                                <SelectItem key={s} value={s} className="text-xs text-foreground focus:bg-gold-subtle">
+                                  {statusLabels[s]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+
+                      {/* ── Items trong nhóm ── */}
+                      {!isCollapsed && (
+                        <Table>
+                          <TableBody>
+                            {group.items.map(order => (
+                              <TableRow key={order.id} className="border-border-subtle transition-colors hover:bg-gold-subtle/20">
+                                <TableCell className="w-28 font-mono text-xs font-bold text-foreground">
+                                  ORD-{String(order.id).padStart(3, '0')}
+                                </TableCell>
+                                <TableCell className="text-foreground">
+                                  {order.dishName ?? `Snapshot #${order.dishSnapshotId}`}
+                                  {order.quantity > 1 && (
+                                    <span className="ml-1 text-xs text-muted-foreground/60">×{order.quantity}</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="font-bold text-primary">{getTotal(order)}</TableCell>
+                                <TableCell><StatusBadge status={order.status} /></TableCell>
+                                <TableCell className="text-muted-foreground text-sm tabular-nums">{formatTime(order.createdAt)}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <button
+                                      onClick={() => setOrderToView(order)}
+                                      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-gold-subtle hover:text-foreground"
+                                      title={t("viewDetails")}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => setOrderToEdit(order)}
+                                      disabled={order.status === 'Cancelled'}
+                                      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-gold-subtle hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                      title={t("editStatus")}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             )}
 
             <PaginationV1
