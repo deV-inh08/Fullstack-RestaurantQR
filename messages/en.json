@@ -93,6 +93,122 @@
       "namePlaceholder": "Enter your name",
       "submit": "Start ordering",
       "unavailable": "This table is currently unavailable. Please ask staff for assistance."
+    },
+    "OrderStatus": {
+      "Pending": "Pending",
+      "Preparing": "Preparing",
+      "Served": "Served",
+      "Cancelled": "Cancelled"
+    },
+    "Menu": {
+      "tableLabel": "Table {number}",
+      "categories": {
+        "Beverage": "Beverage",
+        "MainCourse": "Main Course",
+        "Dessert": "Dessert",
+        "Other": "Other"
+      },
+      "empty": "No dishes available yet",
+      "decreaseAria": "Decrease",
+      "increaseAria": "Increase",
+      "addAria": "Add {name}",
+      "itemsCount": "{count} items",
+      "placeOrder": "Place Order",
+      "orderedToast": "Ordered {count} item(s)!",
+      "sessionExpired": "Session expired. Please scan the QR code again."
+    },
+    "Orders": {
+      "title": "Your Orders — Table {number}",
+      "backAria": "Back to menu",
+      "statusUpdateToast": "{dish} — {status}",
+      "unnamedDish": "Dish",
+      "sessionExpired": "Session expired. Please scan the QR code again."
+    },
+    "Bill": {
+      "pendingCount": "{count} items processing",
+      "allServed": "All served",
+      "paid": "✓ Paid — Thank you!",
+      "requestPayment": "Request Payment",
+      "sending": "Sending...",
+      "requested": "Requested — waiting for staff",
+      "requestSuccess": "Payment request sent. Staff will be right with you!",
+      "requestError": "Could not send request. Please try again."
+    },
+    "Scanner": {
+      "title": "SCAN QR TABLE",
+      "permissionError": "Please allow camera access in your browser settings.",
+      "deviceError": "No camera found on this device.",
+      "genericError": "Could not start the camera. Please try again.",
+      "starting": "Starting camera...",
+      "hintError": "Check camera permission in your browser settings and try again.",
+      "hintScanning": "Point your camera at the QR code on your table to order.",
+      "retry": "RETRY"
+    },
+    "Reservation": {
+      "backHome": "← Home",
+      "adminLink": "Admin",
+      "eyebrow": "BOOK ONLINE",
+      "title": "CHOOSE YOUR TABLE",
+      "subtitle": "Pick a table from the floor plan below, or skip to let the restaurant arrange one for you.",
+      "legend": {
+        "available": "Available",
+        "selected": "Selected",
+        "unavailable": "Unavailable"
+      },
+      "loadingFloorPlan": "Loading floor plan...",
+      "noTables": "No tables have been set up yet",
+      "sections": {
+        "window": "WINDOW",
+        "mainFloor": "MAIN FLOOR",
+        "vip": "VIP / PRIVATE AREA"
+      },
+      "skipSelection": "Skip — let the restaurant arrange a table",
+      "panelTitle": "BOOKING DETAILS",
+      "panelSubtitle": "Fill in your details to confirm the reservation",
+      "selectedTableLabel": "SELECTED TABLE",
+      "selectedTableSummary": "Table {number} · Up to {capacity} guests",
+      "noTableSelected": "No table selected — the restaurant will arrange a suitable one",
+      "fields": {
+        "name": "FULL NAME *",
+        "namePlaceholder": "John Smith",
+        "phone": "PHONE NUMBER *",
+        "phonePlaceholder": "0901 234 567",
+        "email": "EMAIL (optional)",
+        "emailPlaceholder": "example@gmail.com",
+        "date": "DATE *",
+        "time": "TIME *",
+        "guests": "NUMBER OF GUESTS *",
+        "guestsPlaceholder": "2",
+        "note": "SPECIAL REQUEST",
+        "notePlaceholder": "Birthday, food allergy, other requests..."
+      },
+      "submitting": "BOOKING...",
+      "submit": "CONFIRM BOOKING",
+      "confirmHint": "We will contact you by phone within 30 minutes to confirm.",
+      "successToast": "Reservation successful! We'll contact you to confirm shortly.",
+      "table": {
+        "unavailableTitle": "Table {id} — {status}",
+        "availableTitle": "Table {capacity} — {capacity} seats",
+        "pax": "PAX",
+        "occupied": "OCCUPIED",
+        "hidden": "HIDDEN"
+      },
+      "confirmed": {
+        "title": "BOOKING CONFIRMED!",
+        "thankYou": "Thank you, <b>{name}</b>!",
+        "received": "We've received your reservation.",
+        "table": "Table",
+        "tableAssigned": "Restaurant will arrange",
+        "tableNumber": "Table No. {number}",
+        "date": "Date",
+        "time": "Time",
+        "guests": "Guests",
+        "guestsCount": "{count} people",
+        "callHint": "Staff will call to confirm within",
+        "callHintMinutes": "30 minutes",
+        "arriveOnTime": "Please arrive on time to hold your table.",
+        "bookAnother": "BOOK ANOTHER TABLE"
+      }
     }
   },
   "Admin": {

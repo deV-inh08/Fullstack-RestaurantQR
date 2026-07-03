@@ -1,4 +1,5 @@
 import { CheckCircle } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
     tableNumber: number | null;
@@ -9,18 +10,21 @@ interface Props {
     onReset: () => void
 }
 
-function formatDate(d: string) {
-    return new Date(d + 'T00:00').toLocaleDateString('vi-VN', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    })
-}
-
 export default function ConfirmedState({ tableNumber, name, date, time, guests, onReset }: Props) {
+    const t = useTranslations('Guest.Reservation.confirmed')
+    const locale = useLocale()
+
+    function formatDate(d: string) {
+        return new Date(d + 'T00:00').toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        })
+    }
+
     const summary = [
-        ['Bàn', tableNumber ? `Bàn số ${tableNumber}` : 'Nhà hàng sắp xếp'],
-        ['Ngày', formatDate(date)],
-        ['Giờ', time],
-        ['Khách', `${guests} người`],
+        [t('table'), tableNumber ? t('tableNumber', { number: tableNumber }) : t('tableAssigned')],
+        [t('date'), formatDate(date)],
+        [t('time'), time],
+        [t('guests'), t('guestsCount', { count: guests })],
     ]
 
     return (
@@ -43,12 +47,16 @@ export default function ConfirmedState({ tableNumber, name, date, time, guests, 
                 fontSize: 15, fontWeight: 700, color: '#22c55e',
                 margin: '0 0 6px 0', letterSpacing: '0.06em',
             }}>
-                ĐẶT BÀN THÀNH CÔNG!
+                {t('title')}
             </h3>
 
             <p style={{ fontSize: 12, color: '#8A7F72', margin: '0 0 20px 0', lineHeight: 1.6 }}>
-                Cảm ơn <strong style={{ color: '#F5F0E8' }}>{name}</strong>!<br />
-                Chúng tôi đã nhận lịch hẹn của bạn.
+                {t.rich('thankYou', {
+                    name,
+                    b: (chunks) => <strong style={{ color: '#F5F0E8' }}>{chunks}</strong>,
+                })}
+                <br />
+                {t('received')}
             </p>
 
             {/* Summary */}
@@ -68,9 +76,9 @@ export default function ConfirmedState({ tableNumber, name, date, time, guests, 
             </div>
 
             <p style={{ fontSize: 11, color: '#8A7F72', margin: '0 0 20px 0', lineHeight: 1.7 }}>
-                Nhân viên sẽ gọi xác nhận trong vòng{' '}
-                <strong style={{ color: '#F5F0E8' }}>30 phút</strong>.<br />
-                Vui lòng đến đúng giờ để giữ bàn.
+                {t('callHint')}{' '}
+                <strong style={{ color: '#F5F0E8' }}>{t('callHintMinutes')}</strong>.<br />
+                {t('arriveOnTime')}
             </p>
 
             <button
@@ -84,7 +92,7 @@ export default function ConfirmedState({ tableNumber, name, date, time, guests, 
                     cursor: 'pointer',
                 }}
             >
-                ĐẶT THÊM MỘT BÀN KHÁC
+                {t('bookAnother')}
             </button>
         </div>
     )

@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useRouter } from '@/src/i18n/navigation'
-import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { Link, useRouter } from '@/src/i18n/navigation'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { cn, formatCurrency } from '@/src/lib/utils'
@@ -13,23 +14,27 @@ import type { OrderDto } from '@/src/schema/order.schema'
 import { useOrderSignalR } from '@/src/hooks/useOrderSignalR'
 import BillGuestRequestSection from '@/src/components/bill/BillGuestRequestSection'
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  Pending: { label: 'Chờ xử lý', cls: 'bg-white/8 text-foreground border border-foreground/20' },
-  Preparing: { label: 'Đang nấu', cls: 'bg-primary/15 text-primary' },
-  Served: { label: 'Đã phục vụ', cls: 'bg-green-500/20 text-green-400' },
-  Cancelled: { label: 'Đã hủy', cls: 'bg-destructive/20 text-destructive' },
+const STATUS_CLS: Record<string, string> = {
+  Pending: 'bg-white/8 text-foreground border border-foreground/20',
+  Preparing: 'bg-primary/15 text-primary',
+  Served: 'bg-green-500/20 text-green-400',
+  Cancelled: 'bg-destructive/20 text-destructive',
 }
 
 export function StatusPill({ status }: { status: string }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.Pending
+  const t = useTranslations('Guest.OrderStatus')
+  const cls = STATUS_CLS[status] ?? STATUS_CLS.Pending
+  const label = STATUS_CLS[status] ? t(status as any) : status
   return (
-    <span className={cn('inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider', cfg.cls)}>
-      {cfg.label}
+    <span className={cn('inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider', cls)}>
+      {label}
     </span>
   )
 }
 
 export default function GuestOrdersPage() {
+  const t = useTranslations('Guest.Orders')
+  const tStatus = useTranslations('Guest.OrderStatus')
   const [billPaid, setBillPaid] = useState(false)
   const params = useParams()
   const router = useRouter()
@@ -48,23 +53,22 @@ export default function GuestOrdersPage() {
 
   useEffect(() => {
     if ((error as any)?.status === 401) {
-      toast.error('Phiên đã hết hạn. Vui lòng quét QR lại.')
+      toast.error(t('sessionExpired'))
       router.replace(`/table/${tableNumber}/welcome`)
     }
-  }, [error, tableNumber, router])
+  }, [error, tableNumber, router, t])
 
   const handleOrderStatusUpdated = useCallback(
     (order: OrderDto) => {
-      const cfg = STATUS_CONFIG[order.status]
-      if (cfg) {
-        toast(`${order.dishName ?? 'Món ăn'} — ${cfg.label}`, {
+      if (STATUS_CLS[order.status]) {
+        toast(t('statusUpdateToast', { dish: order.dishName ?? t('unnamedDish'), status: tStatus(order.status as any) }), {
           description: `x${order.quantity} · ${formatCurrency(order.dishPrice * order.quantity)}`,
           duration: 5000,
         })
       }
       queryClient.invalidateQueries({ queryKey: guestKeys.myOrders(tableNumber) })
     },
-    [queryClient, tableNumber]
+    [queryClient, tableNumber, t, tStatus]
   )
 
   // Token thật được hook tự lấy qua /api/guest/realtime-token, không còn
@@ -82,8 +86,15 @@ export default function GuestOrdersPage() {
 
   return (
     <div className="flex min-h-screen flex-col pb-32">
-      <header className="border-b border-foreground/10 p-4">
-        <h1 className="text-lg font-bold">Đơn hàng của bạn — Bàn {tableNumber}</h1>
+      <header className="flex items-center gap-3 border-b border-foreground/10 p-4">
+        <Link
+          href={`/table/${tableNumber}`}
+          aria-label={t('backAria')}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-lg font-bold">{t('title', { number: tableNumber })}</h1>
       </header>
 
       {isLoading ? (

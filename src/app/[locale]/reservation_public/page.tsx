@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/src/i18n/navigation'
 import { LayoutGrid, CheckCircle, Loader2, CalendarDays, Clock, Users, Phone, User, MessageSquare, Mail } from 'lucide-react'
 import { toast } from 'sonner'
@@ -75,6 +76,7 @@ function FieldLabel({ icon: Icon, children }: { icon: React.ElementType; childre
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ReservationPage() {
+  const t = useTranslations('Guest.Reservation')
   // Table data from Order.API
   const { data: tableRes, isLoading: tableLoading } = useGetTablesForReservation()
   const tables = tableRes?.payload?.data ?? []
@@ -119,7 +121,7 @@ export default function ReservationPage() {
         note: note.trim() || null,
       })
       setIsConfirmed(true)
-      toast.success('Đặt bàn thành công! Chúng tôi sẽ liên hệ xác nhận sớm.')
+      toast.success(t('successToast'))
     } catch (error) {
       handleErrorApi({ error })
     }
@@ -163,10 +165,10 @@ export default function ReservationPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             <Link href="/" style={{ fontSize: 13, color: '#8A7F72', textDecoration: 'none' }}>
-              ← Trang chủ
+              {t('backHome')}
             </Link>
             <Link href="/login" style={{ fontSize: 13, color: '#8A7F72', textDecoration: 'none' }}>
-              Admin
+              {t('adminLink')}
             </Link>
           </div>
         </div>
@@ -179,22 +181,22 @@ export default function ReservationPage() {
         <section style={{ padding: '40px 48px', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ marginBottom: 28 }}>
             <p style={{ fontSize: 11, color: '#FFC000', letterSpacing: '0.18em', marginBottom: 8, fontWeight: 600 }}>
-              ĐẶT BÀN TRỰC TUYẾN
+              {t('eyebrow')}
             </p>
             <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em', margin: 0, lineHeight: 1.1 }}>
-              CHỌN BÀN CỦA BẠN
+              {t('title')}
             </h1>
             <p style={{ fontSize: 13, color: '#8A7F72', marginTop: 8, lineHeight: 1.6 }}>
-              Chọn bàn mong muốn từ sơ đồ bên dưới, hoặc bỏ qua để nhà hàng tự sắp xếp.
+              {t('subtitle')}
             </p>
           </div>
 
           {/* Legend */}
           <div style={{ display: 'flex', gap: 20, marginBottom: 24, flexWrap: 'wrap' }}>
             {[
-              { color: '#1A1714', border: 'rgba(255,255,255,0.15)', label: 'Trống' },
-              { color: '#FFC000', border: 'transparent', label: 'Đang chọn' },
-              { color: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', label: 'Không khả dụng' },
+              { color: '#1A1714', border: 'rgba(255,255,255,0.15)', label: t('legend.available') },
+              { color: '#FFC000', border: 'transparent', label: t('legend.selected') },
+              { color: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', label: t('legend.unavailable') },
             ].map(l => (
               <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <div style={{
@@ -218,18 +220,18 @@ export default function ReservationPage() {
                 height: 180, gap: 12, color: '#8A7F72',
               }}>
                 <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                <span style={{ fontSize: 13 }}>Đang tải sơ đồ bàn...</span>
+                <span style={{ fontSize: 13 }}>{t('loadingFloorPlan')}</span>
               </div>
             ) : tables.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0', color: '#8A7F72' }}>
                 <LayoutGrid size={32} style={{ opacity: 0.3, marginBottom: 12 }} />
-                <p style={{ fontSize: 13 }}>Chưa có bàn nào được thiết lập</p>
+                <p style={{ fontSize: 13 }}>{t('noTables')}</p>
               </div>
             ) : (
               <>
                 {windowSeats.length > 0 && (
                   <TableSection
-                    title="CỬA SỔ"
+                    title={t('sections.window')}
                     tables={windowSeats}
                     selected={selectedTable}
                     onSelect={setSelectedTable}
@@ -237,7 +239,7 @@ export default function ReservationPage() {
                 )}
                 {mainFloor.length > 0 && (
                   <TableSection
-                    title="KHU VỰC CHÍNH"
+                    title={t('sections.mainFloor')}
                     tables={mainFloor}
                     selected={selectedTable}
                     onSelect={setSelectedTable}
@@ -245,7 +247,7 @@ export default function ReservationPage() {
                 )}
                 {privateArea.length > 0 && (
                   <TableSection
-                    title="KHU VIP / RIÊNG TƯ"
+                    title={t('sections.vip')}
                     tables={privateArea}
                     selected={selectedTable}
                     onSelect={setSelectedTable}
@@ -265,7 +267,7 @@ export default function ReservationPage() {
                 textDecoration: 'underline', padding: 0,
               }}
             >
-              Bỏ qua — để nhà hàng tự sắp xếp bàn
+              {t('skipSelection')}
             </button>
           )}
         </section>
@@ -279,10 +281,10 @@ export default function ReservationPage() {
         }}>
           <div>
             <h2 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '0.06em', margin: '0 0 4px 0' }}>
-              THÔNG TIN ĐẶT BÀN
+              {t('panelTitle')}
             </h2>
             <p style={{ fontSize: 12, color: '#8A7F72', margin: 0 }}>
-              Điền thông tin để xác nhận lịch hẹn
+              {t('panelSubtitle')}
             </p>
           </div>
 
@@ -303,9 +305,9 @@ export default function ReservationPage() {
                 {selectedTable.number}
               </div>
               <div>
-                <div style={{ fontSize: 10, color: '#8A7F72', letterSpacing: '0.1em' }}>BÀN ĐÃ CHỌN</div>
+                <div style={{ fontSize: 10, color: '#8A7F72', letterSpacing: '0.1em' }}>{t('selectedTableLabel')}</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F0E8' }}>
-                  Bàn {selectedTable.number} · Tối đa {selectedTable.capacity} khách
+                  {t('selectedTableSummary', { number: selectedTable.number, capacity: selectedTable.capacity })}
                 </div>
               </div>
             </div>
@@ -318,7 +320,7 @@ export default function ReservationPage() {
             }}>
               <LayoutGrid size={16} style={{ color: '#8A7F72', flexShrink: 0 }} />
               <p style={{ fontSize: 12, color: '#8A7F72', margin: 0, lineHeight: 1.5 }}>
-                Chưa chọn bàn — nhà hàng sẽ sắp xếp phù hợp
+                {t('noTableSelected')}
               </p>
             </div>
           )}
@@ -336,10 +338,10 @@ export default function ReservationPage() {
 
               {/* Name */}
               <div>
-                <FieldLabel icon={User}>HỌ TÊN *</FieldLabel>
+                <FieldLabel icon={User}>{t('fields.name')}</FieldLabel>
                 <input
                   type="text"
-                  placeholder="Nguyễn Văn A"
+                  placeholder={t('fields.namePlaceholder')}
                   value={name}
                   onChange={e => setName(e.target.value)}
                   style={inputStyle}
@@ -350,10 +352,10 @@ export default function ReservationPage() {
 
               {/* Phone */}
               <div>
-                <FieldLabel icon={Phone}>SỐ ĐIỆN THOẠI *</FieldLabel>
+                <FieldLabel icon={Phone}>{t('fields.phone')}</FieldLabel>
                 <input
                   type="tel"
-                  placeholder="0901 234 567"
+                  placeholder={t('fields.phonePlaceholder')}
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   style={inputStyle}
@@ -364,10 +366,10 @@ export default function ReservationPage() {
 
               {/* Email (optional) */}
               <div>
-                <FieldLabel icon={Mail}>EMAIL (tuỳ chọn)</FieldLabel>
+                <FieldLabel icon={Mail}>{t('fields.email')}</FieldLabel>
                 <input
                   type="email"
-                  placeholder="example@gmail.com"
+                  placeholder={t('fields.emailPlaceholder')}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   style={inputStyle}
@@ -379,7 +381,7 @@ export default function ReservationPage() {
               {/* Date + Time */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
-                  <FieldLabel icon={CalendarDays}>NGÀY *</FieldLabel>
+                  <FieldLabel icon={CalendarDays}>{t('fields.date')}</FieldLabel>
                   <input
                     type="date"
                     value={date}
@@ -391,7 +393,7 @@ export default function ReservationPage() {
                   />
                 </div>
                 <div>
-                  <FieldLabel icon={Clock}>GIỜ *</FieldLabel>
+                  <FieldLabel icon={Clock}>{t('fields.time')}</FieldLabel>
                   <input
                     type="time"
                     value={time}
@@ -405,11 +407,11 @@ export default function ReservationPage() {
 
               {/* Guests */}
               <div>
-                <FieldLabel icon={Users}>SỐ LƯỢNG KHÁCH *</FieldLabel>
+                <FieldLabel icon={Users}>{t('fields.guests')}</FieldLabel>
                 <input
                   type="number"
                   min={1} max={30}
-                  placeholder="2"
+                  placeholder={t('fields.guestsPlaceholder')}
                   value={guests}
                   onChange={e => setGuests(e.target.value)}
                   style={inputStyle}
@@ -420,9 +422,9 @@ export default function ReservationPage() {
 
               {/* Note */}
               <div>
-                <FieldLabel icon={MessageSquare}>YÊU CẦU ĐẶC BIỆT</FieldLabel>
+                <FieldLabel icon={MessageSquare}>{t('fields.note')}</FieldLabel>
                 <textarea
-                  placeholder="Sinh nhật, dị ứng thực phẩm, yêu cầu khác..."
+                  placeholder={t('fields.notePlaceholder')}
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   rows={3}
@@ -459,15 +461,15 @@ export default function ReservationPage() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                    ĐANG ĐẶT BÀN...
+                    {t('submitting')}
                   </>
                 ) : (
-                  'XÁC NHẬN ĐẶT BÀN'
+                  t('submit')
                 )}
               </button>
 
               <p style={{ fontSize: 11, color: '#8A7F72', textAlign: 'center', margin: 0, lineHeight: 1.6 }}>
-                Chúng tôi sẽ liên hệ xác nhận qua số điện thoại trong vòng 30 phút.
+                {t('confirmHint')}
               </p>
             </div>
           )}

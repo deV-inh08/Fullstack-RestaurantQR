@@ -93,6 +93,122 @@
       "namePlaceholder": "Nhập tên của bạn",
       "submit": "Bắt đầu gọi món",
       "unavailable": "Bàn này hiện không khả dụng. Vui lòng liên hệ nhân viên để được hỗ trợ."
+    },
+    "OrderStatus": {
+      "Pending": "Chờ xử lý",
+      "Preparing": "Đang nấu",
+      "Served": "Đã phục vụ",
+      "Cancelled": "Đã hủy"
+    },
+    "Menu": {
+      "tableLabel": "Bàn {number}",
+      "categories": {
+        "Beverage": "Nước",
+        "MainCourse": "Món chính",
+        "Dessert": "Tráng miệng",
+        "Other": "Khác"
+      },
+      "empty": "Hiện chưa có món nào",
+      "decreaseAria": "Bớt một",
+      "increaseAria": "Thêm một",
+      "addAria": "Thêm {name}",
+      "itemsCount": "{count} món",
+      "placeOrder": "Đặt món",
+      "orderedToast": "Đã đặt {count} món!",
+      "sessionExpired": "Phiên đã hết hạn. Vui lòng quét QR lại."
+    },
+    "Orders": {
+      "title": "Đơn hàng của bạn — Bàn {number}",
+      "backAria": "Quay lại đặt món",
+      "statusUpdateToast": "{dish} — {status}",
+      "unnamedDish": "Món ăn",
+      "sessionExpired": "Phiên đã hết hạn. Vui lòng quét QR lại."
+    },
+    "Bill": {
+      "pendingCount": "{count} món đang xử lý",
+      "allServed": "Tất cả đã phục vụ",
+      "paid": "✓ Đã thanh toán — Cảm ơn quý khách!",
+      "requestPayment": "Yêu cầu thanh toán",
+      "sending": "Đang gửi...",
+      "requested": "Đã yêu cầu — Chờ nhân viên",
+      "requestSuccess": "Đã gửi yêu cầu thanh toán. Nhân viên sẽ đến ngay!",
+      "requestError": "Không thể gửi yêu cầu. Vui lòng thử lại."
+    },
+    "Scanner": {
+      "title": "QUÉT QR BÀN",
+      "permissionError": "Vui lòng cấp quyền camera trong cài đặt trình duyệt.",
+      "deviceError": "Không tìm thấy camera trên thiết bị này.",
+      "genericError": "Không thể khởi động camera. Thử lại sau.",
+      "starting": "Đang khởi động camera...",
+      "hintError": "Kiểm tra quyền camera trong cài đặt trình duyệt và thử lại.",
+      "hintScanning": "Hướng camera vào mã QR trên bàn của bạn để đặt món.",
+      "retry": "THỬ LẠI"
+    },
+    "Reservation": {
+      "backHome": "← Trang chủ",
+      "adminLink": "Admin",
+      "eyebrow": "ĐẶT BÀN TRỰC TUYẾN",
+      "title": "CHỌN BÀN CỦA BẠN",
+      "subtitle": "Chọn bàn mong muốn từ sơ đồ bên dưới, hoặc bỏ qua để nhà hàng tự sắp xếp.",
+      "legend": {
+        "available": "Trống",
+        "selected": "Đang chọn",
+        "unavailable": "Không khả dụng"
+      },
+      "loadingFloorPlan": "Đang tải sơ đồ bàn...",
+      "noTables": "Chưa có bàn nào được thiết lập",
+      "sections": {
+        "window": "CỬA SỔ",
+        "mainFloor": "KHU VỰC CHÍNH",
+        "vip": "KHU VIP / RIÊNG TƯ"
+      },
+      "skipSelection": "Bỏ qua — để nhà hàng tự sắp xếp bàn",
+      "panelTitle": "THÔNG TIN ĐẶT BÀN",
+      "panelSubtitle": "Điền thông tin để xác nhận lịch hẹn",
+      "selectedTableLabel": "BÀN ĐÃ CHỌN",
+      "selectedTableSummary": "Bàn {number} · Tối đa {capacity} khách",
+      "noTableSelected": "Chưa chọn bàn — nhà hàng sẽ sắp xếp phù hợp",
+      "fields": {
+        "name": "HỌ TÊN *",
+        "namePlaceholder": "Nguyễn Văn A",
+        "phone": "SỐ ĐIỆN THOẠI *",
+        "phonePlaceholder": "0901 234 567",
+        "email": "EMAIL (tuỳ chọn)",
+        "emailPlaceholder": "example@gmail.com",
+        "date": "NGÀY *",
+        "time": "GIỜ *",
+        "guests": "SỐ LƯỢNG KHÁCH *",
+        "guestsPlaceholder": "2",
+        "note": "YÊU CẦU ĐẶC BIỆT",
+        "notePlaceholder": "Sinh nhật, dị ứng thực phẩm, yêu cầu khác..."
+      },
+      "submitting": "ĐANG ĐẶT BÀN...",
+      "submit": "XÁC NHẬN ĐẶT BÀN",
+      "confirmHint": "Chúng tôi sẽ liên hệ xác nhận qua số điện thoại trong vòng 30 phút.",
+      "successToast": "Đặt bàn thành công! Chúng tôi sẽ liên hệ xác nhận sớm.",
+      "table": {
+        "unavailableTitle": "Bàn {id} — {status}",
+        "availableTitle": "Bàn {capacity} — {capacity} chỗ",
+        "pax": "PAX",
+        "occupied": "CÓ KHÁCH",
+        "hidden": "ẨN"
+      },
+      "confirmed": {
+        "title": "ĐẶT BÀN THÀNH CÔNG!",
+        "thankYou": "Cảm ơn <b>{name}</b>!",
+        "received": "Chúng tôi đã nhận lịch hẹn của bạn.",
+        "table": "Bàn",
+        "tableAssigned": "Nhà hàng sắp xếp",
+        "tableNumber": "Bàn số {number}",
+        "date": "Ngày",
+        "time": "Giờ",
+        "guests": "Khách",
+        "guestsCount": "{count} người",
+        "callHint": "Nhân viên sẽ gọi xác nhận trong vòng",
+        "callHintMinutes": "30 phút",
+        "arriveOnTime": "Vui lòng đến đúng giờ để giữ bàn.",
+        "bookAnother": "ĐẶT THÊM MỘT BÀN KHÁC"
+      }
     }
   },
   "Admin": {

@@ -5,7 +5,7 @@ export const routing = defineRouting({
   locales: ['vi', 'en'],
 
   // Ngôn ngữ mặc định khi không match locale nào (vd: user vào "/")
-  defaultLocale: 'en',
+  defaultLocale: 'vi',
 
   // 'always' => luôn có prefix /vi hoặc /en trên mọi route, kể cả locale mặc định.
   // Chọn 'always' để URL luôn tường minh, tránh nhầm lẫn giữa route "không prefix"

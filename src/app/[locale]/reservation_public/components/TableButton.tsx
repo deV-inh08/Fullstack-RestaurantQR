@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { ReservationTableDto } from '@/src/schema/reservation.schema'
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function TableButton({ table, selected, onClick }: Props) {
+    const t = useTranslations('Guest.Reservation.table')
     const [hovered, setHovered] = useState(false)
     const unavailable = table.status !== 'Available'
 
@@ -38,8 +40,8 @@ export default function TableButton({ table, selected, onClick }: Props) {
             onMouseLeave={() => setHovered(false)}
             title={
                 unavailable
-                    ? `Bàn ${table.id} — ${table.status}`
-                    : `Bàn ${table.capacity} — ${table.capacity} chỗ`
+                    ? t('unavailableTitle', { id: table.id, status: table.status })
+                    : t('availableTitle', { capacity: table.capacity })
             }
             style={{
                 width: 64, height: 64,
@@ -57,7 +59,7 @@ export default function TableButton({ table, selected, onClick }: Props) {
         >
             <span style={{ fontSize: 16, fontWeight: 700 }}>{table.id}</span>
             <span style={{ fontSize: 9, letterSpacing: '0.05em', color: subColor }}>
-                {table.capacity} PAX
+                {table.capacity} {t('pax')}
             </span>
 
             {unavailable && (
@@ -66,7 +68,7 @@ export default function TableButton({ table, selected, onClick }: Props) {
                     fontSize: 9, color: '#ef4444', fontWeight: 600,
                     backgroundColor: '#0D0B08', padding: '0 4px', borderRadius: 3,
                 }}>
-                    {table.status === 'Occupied' ? 'CÓ KHÁCH' : 'ẨN'}
+                    {table.status === 'Occupied' ? t('occupied') : t('hidden')}
                 </span>
             )}
         </button>

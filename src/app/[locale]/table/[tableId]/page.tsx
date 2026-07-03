@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/src/i18n/navigation'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -15,19 +16,13 @@ import { DishDto } from '@/src/schema/dish.schema'
 type CartItem = { dishId: number; name: string; price: number; quantity: number }
 const CATEGORY_ORDER = ['Beverage', 'MainCourse', 'Dessert', 'Other'] as const
 
-const CATEGORY_LABEL: Record<string, string> = {
-  Beverage: 'Nước',
-  MainCourse: 'Món chính',
-  Dessert: 'Tráng miệng',
-  Other: 'Khác',
-}
-
 function getCategoryKey(dish: DishDto): string {
   const cat = (dish as any).category as string | undefined
-  return cat && CATEGORY_LABEL[cat] ? cat : 'Other'
+  return cat && CATEGORY_ORDER.includes(cat as any) ? cat : 'Other'
 }
 
 export default function GuestTablePage() {
+  const t = useTranslations('Guest.Menu')
   const params = useParams()
   const router = useRouter()
   const tableId = Number(params.tableId)
@@ -121,13 +116,13 @@ export default function GuestTablePage() {
       )
     },
     onSuccess: () => {
-      toast.success(`Đã đặt ${totalItems} món!`)
+      toast.success(t('orderedToast', { count: totalItems }))
       setCart([])
       router.push(`/table/${tableId}/orders`)
     },
     onError: (error: any) => {
       if (error?.status === 401) {
-        toast.error('Phiên đã hết hạn. Vui lòng quét QR lại.')
+        toast.error(t('sessionExpired'))
         router.replace(`/table/${tableId}/welcome`)
       } else {
         handleErrorApi({ error })
@@ -139,7 +134,7 @@ export default function GuestTablePage() {
     <div className="flex min-h-screen flex-col pb-28">
       <header className="border-b border-foreground/10 p-4">
         <h1 className="text-lg font-bold">
-          Bàn {tableId}{guestInfo ? ` · ${guestInfo.name}` : ''}
+          {t('tableLabel', { number: tableId })}{guestInfo ? ` · ${guestInfo.name}` : ''}
         </h1>
       </header>
 
@@ -162,7 +157,7 @@ export default function GuestTablePage() {
                       : 'bg-foreground/6 text-foreground/70 hover:bg-foreground/10',
                   ].join(' ')}
                 >
-                  {CATEGORY_LABEL[key] ?? key}
+                  {t(`categories.${key}` as any)}
                   <span
                     className={[
                       'rounded-full px-1.5 text-[10px] font-semibold tabular-nums',
@@ -188,7 +183,7 @@ export default function GuestTablePage() {
         </div>
       ) : visibleDishes.length === 0 ? (
         <div className="flex flex-1 items-center justify-center text-sm text-foreground/50">
-          Hiện chưa có món nào
+          {t('empty')}
         </div>
       ) : (
         <ul className="divide-y divide-foreground/8 px-4">
@@ -223,7 +218,7 @@ export default function GuestTablePage() {
                   {qty > 0 ? (
                     <>
                       <button
-                        aria-label="Bớt một"
+                        aria-label={t('decreaseAria')}
                         onClick={() => removeFromCart(dish.id)}
                         className="flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 text-foreground/70 active:scale-95"
                       >
@@ -233,7 +228,7 @@ export default function GuestTablePage() {
                         {qty}
                       </span>
                       <button
-                        aria-label="Thêm một"
+                        aria-label={t('increaseAria')}
                         onClick={() => addToCart(dish)}
                         className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95"
                       >
@@ -242,7 +237,7 @@ export default function GuestTablePage() {
                     </>
                   ) : (
                     <button
-                      aria-label={`Thêm ${dish.name}`}
+                      aria-label={t('addAria', { name: dish.name })}
                       onClick={() => addToCart(dish)}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95"
                     >
@@ -260,7 +255,7 @@ export default function GuestTablePage() {
         <div className="fixed inset-x-0 bottom-0 border-t border-foreground/10 bg-card p-4">
           <div className="mx-auto flex max-w-lg items-center justify-between">
             <div>
-              <p className="text-xs text-foreground/60">{totalItems} món</p>
+              <p className="text-xs text-foreground/60">{t('itemsCount', { count: totalItems })}</p>
               <p className="text-lg font-bold">{formatCurrency(totalPrice)}</p>
             </div>
             <button
@@ -269,7 +264,7 @@ export default function GuestTablePage() {
               className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
               {orderMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Đặt món
+              {t('placeOrder')}
             </button>
           </div>
         </div>

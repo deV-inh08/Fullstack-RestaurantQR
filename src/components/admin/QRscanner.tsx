@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/src/i18n/navigation'
 
 interface QRScannerModalProps {
@@ -9,6 +10,7 @@ interface QRScannerModalProps {
 }
 
 export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
+    const t = useTranslations('Guest.Scanner')
     const router = useRouter()
     const scannerRef = useRef<any>(null)
     const [status, setStatus] = useState<'idle' | 'scanning' | 'error'>('idle')
@@ -66,10 +68,10 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
             } catch (err: any) {
                 const msg =
                     err?.message?.includes('Permission')
-                        ? 'Vui lòng cấp quyền camera trong cài đặt trình duyệt.'
+                        ? t('permissionError')
                         : err?.message?.includes('device')
-                            ? 'Không tìm thấy camera trên thiết bị này.'
-                            : 'Không thể khởi động camera. Thử lại sau.'
+                            ? t('deviceError')
+                            : t('genericError')
                 setStatus('error')
                 setErrorMsg(msg)
             }
@@ -85,7 +87,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
             }
             scannerRef.current = null
         }
-    }, [isOpen])
+    }, [isOpen, t])
 
     const handleClose = () => {
         if (scannerRef.current?.isScanning) {   // ← chỉ stop khi đang chạy
@@ -159,7 +161,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 letterSpacing: '0.08em',
                             }}
                         >
-                            SCAN QR TABLE
+                            {t('title')}
                         </span>
                     </div>
                     <button
@@ -282,7 +284,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 backgroundColor: '#0D0B08',
                             }}
                         >
-                            <div style={{ color: '#8A7F72', fontSize: '12px' }}>Đang khởi động camera...</div>
+                            <div style={{ color: '#8A7F72', fontSize: '12px' }}>{t('starting')}</div>
                         </div>
                     )}
                 </div>
@@ -299,8 +301,8 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                     }}
                 >
                     {status === 'error'
-                        ? 'Kiểm tra quyền camera trong cài đặt trình duyệt và thử lại.'
-                        : 'Hướng camera vào mã QR trên bàn của bạn để đặt món.'}
+                        ? t('hintError')
+                        : t('hintScanning')}
                 </p>
 
                 {/* Retry button (only on error) */}
@@ -330,7 +332,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                             width: '100%',
                         }}
                     >
-                        THỬ LẠI
+                        {t('retry')}
                     </button>
                 )}
             </div>
