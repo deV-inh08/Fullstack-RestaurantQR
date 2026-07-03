@@ -60,7 +60,7 @@
       }
     },
     "footer": {
-      "copyright": "© 2024 Nhà Hàng Viet Gold",
+      "copyright": "© 2026 Nhà Hàng Viet Gold",
       "menu": "THỰC ĐƠN",
       "privacy": "CHÍNH SÁCH",
       "contact": "LIÊN HỆ"
@@ -74,7 +74,7 @@
     "emailLabel": "Email",
     "passwordLabel": "Mật khẩu",
     "submit": "Đăng Nhập",
-    "copyright": "© 2024 Viet Gold"
+    "copyright": "© 2026 Viet Gold"
   },
   "AdminNav": {
     "dashboard": "Tổng Quan",
@@ -236,7 +236,10 @@
       "cancelled": "ĐÃ HỦY"
     },
     "Dashboard": {
-      "header": { "title": "Tổng Quan", "subtitle": "Chào mừng trở lại, Admin" },
+      "header": {
+        "title": "Tổng Quan",
+        "subtitle": "Chào mừng trở lại, Admin"
+      },
       "metrics": {
         "revenue": "Doanh thu",
         "revenueChange": "Tổng đơn đã phục vụ",
@@ -272,7 +275,10 @@
       }
     },
     "Accounts": {
-      "header": { "title": "Tài Khoản", "subtitle": "Quản lý tài khoản nhân viên" },
+      "header": {
+        "title": "Tài Khoản",
+        "subtitle": "Quản lý tài khoản nhân viên"
+      },
       "searchPlaceholder": "Tìm theo tên hoặc email...",
       "createAdmin": "Tạo Admin",
       "createStaff": "Tạo Staff",
@@ -280,7 +286,10 @@
       "empty": "Không có tài khoản nào"
     },
     "Orders": {
-      "header": { "title": "Đơn Hàng", "subtitle": "Quản lý đơn hàng theo thời gian thực" },
+      "header": {
+        "title": "Đơn Hàng",
+        "subtitle": "Quản lý đơn hàng theo thời gian thực"
+      },
       "loading": "Đang tải...",
       "dateTo": "đến",
       "statusAll": "Tất cả trạng thái",
@@ -321,7 +330,10 @@
       }
     },
     "Tables": {
-      "header": { "title": "Bàn Ăn", "subtitle": "Quản lý bàn ăn và QR code" },
+      "header": {
+        "title": "Bàn Ăn",
+        "subtitle": "Quản lý bàn ăn và QR code"
+      },
       "loading": "Đang tải...",
       "searchPlaceholder": "Tìm số bàn...",
       "addTable": "Thêm Bàn",
@@ -336,7 +348,10 @@
       "editAction": "Sửa"
     },
     "Reservations": {
-      "header": { "title": "Đặt Bàn", "subtitle": "Quản lý lịch đặt bàn" },
+      "header": {
+        "title": "Đặt Bàn",
+        "subtitle": "Quản lý lịch đặt bàn"
+      },
       "metrics": {
         "total": "TỔNG LỊCH ĐẶT",
         "pending": "ĐANG CHỜ",
@@ -381,7 +396,10 @@
       }
     },
     "Settings": {
-      "header": { "title": "Cài Đặt", "subtitle": "Cập nhật hồ sơ và bảo mật" },
+      "header": {
+        "title": "Cài Đặt",
+        "subtitle": "Cập nhật hồ sơ và bảo mật"
+      },
       "profileTitle": "Hồ Sơ",
       "changePhoto": "Đổi Ảnh",
       "fullNameLabel": "Họ Tên",

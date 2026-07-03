@@ -60,7 +60,7 @@
       }
     },
     "footer": {
-      "copyright": "© 2024 Viet Gold Restaurant",
+      "copyright": "© 2026 Viet Gold Restaurant",
       "menu": "MENU",
       "privacy": "PRIVACY",
       "contact": "CONTACT"
@@ -74,7 +74,7 @@
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "submit": "Sign In",
-    "copyright": "© 2024 Viet Gold"
+    "copyright": "© 2026 Viet Gold"
   },
   "AdminNav": {
     "dashboard": "Dashboard",
@@ -236,7 +236,10 @@
       "cancelled": "CANCELLED"
     },
     "Dashboard": {
-      "header": { "title": "Dashboard", "subtitle": "Welcome back, Admin" },
+      "header": {
+        "title": "Dashboard",
+        "subtitle": "Welcome back, Admin"
+      },
       "metrics": {
         "revenue": "Revenue",
         "revenueChange": "Total served orders",
@@ -272,7 +275,10 @@
       }
     },
     "Accounts": {
-      "header": { "title": "Accounts", "subtitle": "Manage staff accounts" },
+      "header": {
+        "title": "Accounts",
+        "subtitle": "Manage staff accounts"
+      },
       "searchPlaceholder": "Search by name or email...",
       "createAdmin": "Create Admin",
       "createStaff": "Create Staff",
@@ -280,7 +286,10 @@
       "empty": "No accounts yet"
     },
     "Orders": {
-      "header": { "title": "Orders", "subtitle": "Manage orders in real time" },
+      "header": {
+        "title": "Orders",
+        "subtitle": "Manage orders in real time"
+      },
       "loading": "Loading...",
       "dateTo": "to",
       "statusAll": "All Status",
@@ -321,7 +330,10 @@
       }
     },
     "Tables": {
-      "header": { "title": "Tables", "subtitle": "Manage tables and QR codes" },
+      "header": {
+        "title": "Tables",
+        "subtitle": "Manage tables and QR codes"
+      },
       "loading": "Loading...",
       "searchPlaceholder": "Search table number...",
       "addTable": "Add Table",
@@ -336,7 +348,10 @@
       "editAction": "Edit"
     },
     "Reservations": {
-      "header": { "title": "Reservations", "subtitle": "Manage reservation schedule" },
+      "header": {
+        "title": "Reservations",
+        "subtitle": "Manage reservation schedule"
+      },
       "metrics": {
         "total": "TOTAL BOOKINGS",
         "pending": "PENDING",
@@ -381,7 +396,10 @@
       }
     },
     "Settings": {
-      "header": { "title": "Settings", "subtitle": "Update profile and security" },
+      "header": {
+        "title": "Settings",
+        "subtitle": "Update profile and security"
+      },
       "profileTitle": "Profile",
       "changePhoto": "Change Photo",
       "fullNameLabel": "Full Name",
