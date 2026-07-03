@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import {
   Bar,
   BarChart,
@@ -32,6 +33,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function TopDishesChart() {
+  const t = useTranslations("Admin.Dashboard.charts")
   const { data: ordersData, isLoading } = useGetOrders({
     page: 1,
     pageSize: 100
@@ -59,19 +61,19 @@ export function TopDishesChart() {
     <div className="border border-border bg-card p-6">
       <div className="mb-6">
         <h3 className="text-lg font-bold uppercase tracking-tight text-foreground">
-          Top Dishes
+          {t("topDishesTitle")}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Món bán chạy (tổng số lượng, trừ đã hủy)
+          {t("topDishesSubtitle")}
         </p>
       </div>
       {isLoading ? (
         <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-          Đang tải...
+          {t("loading")}
         </div>
       ) : chartData.length === 0 ? (
         <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-          Chưa có dữ liệu đơn hàng
+          {t("empty")}
         </div>
       ) : (
         <ChartContainer config={chartConfig} className="h-[300px] w-full">

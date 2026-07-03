@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import {
   Bar,
   BarChart,
@@ -38,6 +39,7 @@ const chartConfig = {
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 export function RevenueChart() {
+  const t = useTranslations("Admin.Dashboard.charts")
   const { data: ordersData } = useGetOrders({
     page: 1,
     pageSize: 100
@@ -70,10 +72,10 @@ export function RevenueChart() {
     <div className="border border-border bg-card p-6">
       <div className="mb-6">
         <h3 className="text-lg font-bold uppercase tracking-tight text-foreground">
-          Revenue Overview
+          {t("revenueTitle")}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Monthly revenue for the current year
+          {t("revenueSubtitle")}
         </p>
       </div>
       <ChartContainer config={chartConfig} className="h-[300px] w-full">

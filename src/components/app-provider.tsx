@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { create } from 'zustand'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -18,14 +18,16 @@ export const useAppProviderStore = create<AppProviderState>()((set) => ({
     setRole: (role) => set({ role, isAuth: Boolean(role) }),
 }))
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            refetchOnWindowFocus: false,
-            refetchOnMount: true,
+function makeQueryClient() {
+    return new QueryClient({
+        defaultOptions: {
+            queries: {
+                refetchOnWindowFocus: false,
+                refetchOnMount: true,
+            }
         }
-    }
-})
+    })
+}
 
 /**
  * Không còn decode JWT từ localStorage nữa. Role giờ lấy bằng cách hỏi
@@ -52,6 +54,11 @@ function AuthBootstrap() {
 }
 
 function AppProvider({ children }: { children: React.ReactNode }) {
+    // Tạo QueryClient một lần trên mỗi mount (không phải module scope) — bắt buộc trong
+    // App Router để tránh chia sẻ cache giữa các request/user khác nhau lúc SSR/SSG,
+    // và tránh lỗi "No QueryClient set" khi Next.js render nhiều trang song song.
+    const [queryClient] = useState(makeQueryClient)
+
     return (
         <QueryClientProvider client={queryClient}>
             <AuthBootstrap />

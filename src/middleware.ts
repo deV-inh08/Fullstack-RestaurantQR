@@ -1,19 +1,61 @@
 import { NextResponse, type NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import { Roles, type RoleType } from "@/src/constants/role";
 import { decodeToken } from "./lib/utils";
+import { routing } from "./i18n/routing";
+
+const handleI18nRouting = createMiddleware(routing);
 
 const adminPaths = ['/admin']
 const loginPaths = ['/login']
 const privatePaths = [...adminPaths]
 
+// "/vi/admin/dishes" -> "/admin/dishes" (bỏ locale prefix để so khớp với adminPaths/loginPaths)
+function stripLocale(pathname: string) {
+    const segments = pathname.split('/')
+    const maybeLocale = segments[1]
+    if ((routing.locales as readonly string[]).includes(maybeLocale)) {
+        return '/' + segments.slice(2).join('/')
+    }
+    return pathname
+}
+
+function getLocale(pathname: string) {
+    const segments = pathname.split('/')
+    const maybeLocale = segments[1]
+    return (routing.locales as readonly string[]).includes(maybeLocale)
+        ? maybeLocale
+        : routing.defaultLocale
+}
+
+// Redirect nhưng vẫn giữ lại cookie (vd: NEXT_LOCALE) mà next-intl đã set trên `base`
+function redirectPreservingCookies(url: URL, base: NextResponse) {
+    const response = NextResponse.redirect(url)
+    base.cookies.getAll().forEach((cookie) => response.cookies.set(cookie))
+    return response
+}
+
 export async function middleware(request: NextRequest) {
+    // ── 0. Xử lý locale routing trước (redirect thêm prefix /vi, /en nếu thiếu) ──
+    const intlResponse = handleI18nRouting(request)
+
+    // next-intl đã redirect vì URL chưa có locale prefix -> để redirect này chạy,
+    // auth sẽ được kiểm tra lại ở request kế tiếp (khi URL đã có locale).
+    if (intlResponse.headers.get('location')) {
+        return intlResponse
+    }
+
     const { pathname } = request.nextUrl
+    const locale = getLocale(pathname)
+    const bare = stripLocale(pathname)
+    const localizedUrl = (path: string) => new URL(`/${locale}${path}`, request.url)
+
     const accessToken = request.cookies.get('accessToken')?.value
     const refreshToken = request.cookies.get('refreshToken')?.value
 
     // ── 1. Không có refreshToken → chưa đăng nhập ───────────────────────────
-    if (privatePaths.some(p => pathname.startsWith(p)) && !refreshToken) {
-        return NextResponse.redirect(new URL('/login', request.url))
+    if (privatePaths.some(p => bare.startsWith(p)) && !refreshToken) {
+        return redirectPreservingCookies(localizedUrl('/login'), intlResponse)
     }
 
     // ── 2. refreshToken có nhưng accessToken đã hết hạn (cookie bị browser xóa)
@@ -30,10 +72,10 @@ export async function middleware(request: NextRequest) {
     //      POST /api/v1/auth/refresh-token
     //      Body: { refreshToken: string }          ← RefreshTokenRequest record
     //      Response: { message, data: { accessToken, refreshToken } }
-    if (privatePaths.some(p => pathname.startsWith(p)) && refreshToken && !accessToken) {
+    if (privatePaths.some(p => bare.startsWith(p)) && refreshToken && !accessToken) {
         const identityUrl = process.env.IDENTITY_API_URL
         if (!identityUrl) {
-            return NextResponse.redirect(new URL('/login', request.url))
+            return redirectPreservingCookies(localizedUrl('/login'), intlResponse)
         }
 
         try {
@@ -47,7 +89,7 @@ export async function middleware(request: NextRequest) {
             if (!res.ok) {
                 // Refresh token hết hạn hoặc bị revoke
                 // (ChangePassword xóa toàn bộ RT, Logout xóa RT cụ thể)
-                const redirect = NextResponse.redirect(new URL('/login', request.url))
+                const redirect = redirectPreservingCookies(localizedUrl('/login'), intlResponse)
                 redirect.cookies.delete('accessToken')
                 redirect.cookies.delete('refreshToken')
                 return redirect
@@ -55,14 +97,14 @@ export async function middleware(request: NextRequest) {
 
             // Response: { message, data: { accessToken, refreshToken } }
             const json = await res.json()
-            console.log("middleware__res", json.data)
 
             const { accessToken: newAT, refreshToken: newRT } = json.data
 
             const decodedAT = decodeToken(newAT) as { exp: number } | null
             const decodedRT = decodeToken(newRT) as { exp: number } | null
 
-            const response = NextResponse.next()
+            // Tái sử dụng intlResponse để không mất cookie NEXT_LOCALE mà next-intl đã set
+            const response = intlResponse
             response.cookies.set('accessToken', newAT, {
                 httpOnly: true,
                 expires: decodedAT?.exp ? new Date(decodedAT.exp * 1000) : undefined,
@@ -87,7 +129,7 @@ export async function middleware(request: NextRequest) {
             return response
 
         } catch {
-            return NextResponse.redirect(new URL('/login', request.url))
+            return redirectPreservingCookies(localizedUrl('/login'), intlResponse)
         }
     }
 
@@ -96,21 +138,23 @@ export async function middleware(request: NextRequest) {
         const decoded = decodeToken(accessToken) as { role: RoleType } | null
         const role = decoded?.role
 
-        if (loginPaths.some(p => pathname.startsWith(p))) {
-            return NextResponse.redirect(new URL('/admin', request.url))
+        if (loginPaths.some(p => bare.startsWith(p))) {
+            return redirectPreservingCookies(localizedUrl('/admin'), intlResponse)
         }
 
-        if (adminPaths.some(p => pathname.startsWith(p))) {
+        if (adminPaths.some(p => bare.startsWith(p))) {
             const allowedRoles: RoleType[] = [Roles.Admin, Roles.SuperAdmin, Roles.Staff]
             if (!role || !allowedRoles.includes(role)) {
-                return NextResponse.redirect(new URL('/', request.url))
+                return redirectPreservingCookies(localizedUrl('/'), intlResponse)
             }
         }
     }
 
-    return NextResponse.next()
+    return intlResponse
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/login']
+    // Chạy middleware trên mọi route "trang" (không phải api/static) để next-intl
+    // có thể xử lý locale routing, đồng thời vẫn cover /admin và /login cho auth.
+    matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 }

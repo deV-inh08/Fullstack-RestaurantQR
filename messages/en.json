@@ -1,0 +1,282 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Viet Gold Restaurant | QR Ordering Menu",
+      "description": "Discover authentic Vietnamese cuisine at Viet Gold. Order in seconds by scanning the QR code at your table."
+    },
+    "login": {
+      "title": "Admin Login | Viet Gold",
+      "description": "Sign in to manage Viet Gold restaurant's dishes, tables, and orders."
+    }
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "vi": "VI",
+    "en": "EN"
+  },
+  "HomePage": {
+    "brand": "VIET GOLD",
+    "nav": {
+      "loginShort": "LOGIN",
+      "loginFull": "ADMIN LOGIN",
+      "scanQr": "SCAN QR"
+    },
+    "hero": {
+      "eyebrow": "AUTHENTIC VIETNAMESE CUISINE",
+      "subtitle": "Experience the finest Vietnamese flavors, crafted with tradition and passion.",
+      "exploreMenu": "EXPLORE MENU →",
+      "bookTable": "BOOK A TABLE"
+    },
+    "stats": {
+      "dishes": "DISHES",
+      "tables": "TABLES",
+      "rating": "RATING",
+      "serving": "SERVING"
+    },
+    "featured": {
+      "title": "FEATURED DISHES",
+      "viewAllShort": "ALL →",
+      "viewAllFull": "VIEW ALL MENU →",
+      "dishSubtitle": "Vietnamese specialty with authentic flavors",
+      "popular": "POPULAR"
+    },
+    "why": {
+      "title": "WHY VIET GOLD",
+      "freshDaily": {
+        "label": "Fresh Daily",
+        "text": "Ingredients sourced fresh every morning"
+      },
+      "qrOrdering": {
+        "label": "QR Ordering",
+        "text": "Scan, order and pay from your table"
+      },
+      "familyRecipes": {
+        "label": "Family Recipes",
+        "text": "Authentic recipes passed down through generations"
+      },
+      "fastService": {
+        "label": "Fast Service",
+        "text": "Real-time kitchen updates, minimal wait times"
+      }
+    },
+    "footer": {
+      "copyright": "© 2024 Viet Gold Restaurant",
+      "menu": "MENU",
+      "privacy": "PRIVACY",
+      "contact": "CONTACT"
+    }
+  },
+  "LoginPage": {
+    "tagline": "Taste the Tradition",
+    "taglineSubtitle": "Experience authentic Vietnamese flavors at Viet Gold",
+    "heading": "Welcome Back",
+    "subheading": "Sign in to your account",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submit": "Sign In",
+    "copyright": "© 2024 Viet Gold"
+  },
+  "AdminNav": {
+    "dashboard": "Dashboard",
+    "dishes": "Dishes",
+    "accounts": "Accounts",
+    "orders": "Orders",
+    "tables": "Tables",
+    "reservations": "Reservations",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "Guest": {
+    "Welcome": {
+      "tableLabel": "Table {number}",
+      "nameLabel": "Your name",
+      "namePlaceholder": "Enter your name",
+      "submit": "Start ordering",
+      "unavailable": "This table is currently unavailable. Please ask staff for assistance."
+    }
+  },
+  "Admin": {
+    "Common": {
+      "loading": "Loading...",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "close": "Close",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "edit": "Edit",
+      "tablePrefix": "Table {number}"
+    },
+    "OrderStatus": {
+      "pending": "Pending",
+      "preparing": "Preparing",
+      "served": "Served",
+      "cancelled": "Cancelled"
+    },
+    "OrderStatusBadge": {
+      "pending": "PENDING",
+      "preparing": "PROCESSING",
+      "served": "DELIVERED",
+      "cancelled": "CANCELLED"
+    },
+    "Dashboard": {
+      "header": { "title": "Dashboard", "subtitle": "Welcome back, Admin" },
+      "metrics": {
+        "revenue": "Revenue",
+        "revenueChange": "Total served orders",
+        "totalOrders": "Total Orders",
+        "totalOrdersProcessing": "{count} processing",
+        "activeTables": "Occupied Tables",
+        "activeTablesOf": "/ {total} tables",
+        "avgOrderValue": "Avg Order Value",
+        "avgOrderValueChange": "Per served order"
+      },
+      "charts": {
+        "revenueTitle": "Revenue Overview",
+        "revenueSubtitle": "Monthly revenue for the current year",
+        "topDishesTitle": "Top Dishes",
+        "topDishesSubtitle": "Best-selling dishes (total quantity, excluding cancelled)",
+        "loading": "Loading...",
+        "empty": "No order data yet"
+      },
+      "recentOrders": {
+        "title": "Recent Orders",
+        "subtitle": "5 latest orders from all tables",
+        "loading": "Loading...",
+        "empty": "No orders yet",
+        "columns": {
+          "orderId": "Order ID",
+          "table": "Table",
+          "guest": "Guest",
+          "dish": "Dish",
+          "total": "Total",
+          "status": "Status",
+          "time": "Time"
+        }
+      }
+    },
+    "Accounts": {
+      "header": { "title": "Accounts", "subtitle": "Manage staff accounts" },
+      "searchPlaceholder": "Search by name or email...",
+      "createAdmin": "Create Admin",
+      "createStaff": "Create Staff",
+      "loading": "Loading...",
+      "empty": "No accounts yet"
+    },
+    "Orders": {
+      "header": { "title": "Orders", "subtitle": "Manage orders in real time" },
+      "loading": "Loading...",
+      "dateTo": "to",
+      "statusAll": "All Status",
+      "totalCount": "{count} orders total",
+      "createOrder": "Create Order",
+      "columns": {
+        "orderId": "ORDER ID",
+        "table": "TABLE",
+        "guest": "GUEST",
+        "items": "ITEMS",
+        "total": "TOTAL",
+        "status": "STATUS",
+        "time": "TIME",
+        "actions": "ACTIONS"
+      },
+      "empty": "No orders yet",
+      "viewDetails": "View details",
+      "editStatus": "Edit status",
+      "editModal": {
+        "title": "Update order #{id}",
+        "table": "Table",
+        "dish": "Dish",
+        "quantity": "Quantity",
+        "status": "Status",
+        "cancelOrder": "Cancel Order",
+        "confirmCancelTitle": "Cancel order #{id}?",
+        "confirmCancelDesc": "The order will be marked Cancelled. This action cannot be undone.",
+        "keep": "Keep order",
+        "confirmCancel": "Confirm cancel",
+        "cancelling": "Cancelling..."
+      }
+    },
+    "Tables": {
+      "header": { "title": "Tables", "subtitle": "Manage tables and QR codes" },
+      "loading": "Loading...",
+      "searchPlaceholder": "Search table number...",
+      "addTable": "Add Table",
+      "columns": {
+        "number": "Number",
+        "capacity": "Capacity",
+        "qrCode": "QR Code",
+        "status": "Status"
+      },
+      "capacitySuffix": "seats",
+      "empty": "No tables yet",
+      "editAction": "Edit"
+    },
+    "Reservations": {
+      "header": { "title": "Reservations", "subtitle": "Manage reservation schedule" },
+      "metrics": {
+        "total": "TOTAL BOOKINGS",
+        "pending": "PENDING",
+        "today": "TODAY"
+      },
+      "searchPlaceholder": "Search by name or phone number...",
+      "statusAll": "All statuses",
+      "columns": {
+        "guest": "GUEST",
+        "phone": "PHONE",
+        "table": "TABLE",
+        "datetime": "DATE & TIME",
+        "guests": "GUESTS",
+        "deposit": "DEPOSIT",
+        "note": "NOTE",
+        "status": "STATUS",
+        "actions": "ACTIONS"
+      },
+      "empty": "No reservations yet",
+      "emptyHint": "Try changing the filters",
+      "prevPage": "← Previous",
+      "nextPage": "Next →",
+      "pageOf": "Page {page} / {totalPages}",
+      "noTable": "Not selected",
+      "reservationStatus": {
+        "booked": "Booked",
+        "checkedIn": "Checked In",
+        "cancelled": "Cancelled"
+      },
+      "depositStatus": {
+        "none": "No deposit",
+        "pending": "Awaiting deposit",
+        "paid": "Deposit paid",
+        "refunded": "Refunded",
+        "forfeited": "Forfeited"
+      },
+      "actions": {
+        "checkIn": "Check-in",
+        "cancel": "Cancel",
+        "markPaid": "Mark Paid",
+        "delete": "Delete"
+      }
+    },
+    "Settings": {
+      "header": { "title": "Settings", "subtitle": "Update profile and security" },
+      "profileTitle": "Profile",
+      "changePhoto": "Change Photo",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Enter full name",
+      "emailLabel": "Email",
+      "emailReadonly": "(cannot be changed)",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "profileUpdated": "Profile updated",
+      "passwordUpdated": "Password changed successfully",
+      "securityTitle": "Security",
+      "securityWarning": "After changing your password, you will be logged out of all devices.",
+      "changePasswordTitle": "Change Password",
+      "currentPasswordLabel": "Current Password",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "updatePassword": "Update Password",
+      "updating": "Updating..."
+    }
+  }
+}

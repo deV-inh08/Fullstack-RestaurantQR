@@ -3,7 +3,8 @@
 import { Suspense } from "react"
 import { NotificationBell } from "./NotificationBellAdmin"
 import { useGetMe } from "@/src/queries/useAccount"
-import Link from "next/link"
+import { Link } from "@/src/i18n/navigation"
+import { LanguageSwitcher } from "@/src/components/language-switcher"
 
 interface AdminHeaderProps {
   title: string
@@ -30,6 +31,7 @@ function AdminHeaderInner({ title, subtitle }: AdminHeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        <LanguageSwitcher />
         <NotificationBell />
 
         <Link href="/admin/settings" className="flex items-center gap-3 border-l border-border-subtle pl-4">

@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { Link, usePathname, useRouter } from "@/src/i18n/navigation"
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -18,16 +18,17 @@ import { BillBadge } from "../bill/Billbadge"
 import { useAppProviderStore } from "@/src/components/app-provider"
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/dishes", label: "Dishes", icon: UtensilsCrossed },
-  { href: "/admin/accounts", label: "Accounts", icon: Users },
-  { href: "/admin/orders", label: "Orders", icon: ClipboardList, showBillBadge: true },
-  { href: "/admin/tables", label: "Tables", icon: QrCode },
-  { href: "/admin/reservations", label: "Reservations", icon: CalendarDays },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
-]
+  { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard },
+  { href: "/admin/dishes", labelKey: "dishes", icon: UtensilsCrossed },
+  { href: "/admin/accounts", labelKey: "accounts", icon: Users },
+  { href: "/admin/orders", labelKey: "orders", icon: ClipboardList, showBillBadge: true },
+  { href: "/admin/tables", labelKey: "tables", icon: QrCode },
+  { href: "/admin/reservations", labelKey: "reservations", icon: CalendarDays },
+  { href: "/admin/settings", labelKey: "settings", icon: Settings },
+] as const
 
 export function AdminSidebar() {
+  const t = useTranslations("AdminNav")
   const pathname = usePathname()
   const router = useRouter()
   const setRole = useAppProviderStore((state) => state.setRole)
@@ -78,9 +79,9 @@ export function AdminSidebar() {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
                 {/* BillBadge only on Orders nav item */}
-                {item.showBillBadge && <BillBadge />}
+                {"showBillBadge" in item && item.showBillBadge && <BillBadge />}
               </Link>
             )
           })}
@@ -93,7 +94,7 @@ export function AdminSidebar() {
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />
-            Logout
+            {t("logout")}
           </button>
         </div>
       </div>

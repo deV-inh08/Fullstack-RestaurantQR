@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/src/i18n/navigation'
 
 interface QRScannerModalProps {
     isOpen: boolean

@@ -1,0 +1,282 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Nhà Hàng Viet Gold | Thực Đơn Gọi Món QR",
+      "description": "Khám phá ẩm thực Việt đích thực tại Viet Gold. Gọi món chỉ trong vài giây bằng cách quét mã QR tại bàn."
+    },
+    "login": {
+      "title": "Đăng Nhập | Viet Gold",
+      "description": "Đăng nhập để quản lý món ăn, bàn ăn và đơn hàng của nhà hàng Viet Gold."
+    }
+  },
+  "LanguageSwitcher": {
+    "label": "Ngôn ngữ",
+    "vi": "VI",
+    "en": "EN"
+  },
+  "HomePage": {
+    "brand": "VIET GOLD",
+    "nav": {
+      "loginShort": "ĐĂNG NHẬP",
+      "loginFull": "ĐĂNG NHẬP",
+      "scanQr": "QUÉT MÃ QR"
+    },
+    "hero": {
+      "eyebrow": "ẨM THỰC VIỆT ĐÍCH THỰC",
+      "subtitle": "Trải nghiệm hương vị Việt Nam tinh túy nhất, được chế biến bằng truyền thống và đam mê.",
+      "exploreMenu": "XEM THỰC ĐƠN →",
+      "bookTable": "ĐẶT BÀN"
+    },
+    "stats": {
+      "dishes": "MÓN ĂN",
+      "tables": "BÀN",
+      "rating": "ĐÁNH GIÁ",
+      "serving": "NĂM PHỤC VỤ"
+    },
+    "featured": {
+      "title": "MÓN NỔI BẬT",
+      "viewAllShort": "TẤT CẢ →",
+      "viewAllFull": "XEM TOÀN BỘ THỰC ĐƠN →",
+      "dishSubtitle": "Đặc sản Việt Nam với hương vị đích thực",
+      "popular": "PHỔ BIẾN"
+    },
+    "why": {
+      "title": "VÌ SAO CHỌN VIET GOLD",
+      "freshDaily": {
+        "label": "Tươi Mỗi Ngày",
+        "text": "Nguyên liệu được nhập tươi mỗi sáng"
+      },
+      "qrOrdering": {
+        "label": "Gọi Món Qua QR",
+        "text": "Quét mã, gọi món và thanh toán ngay tại bàn"
+      },
+      "familyRecipes": {
+        "label": "Công Thức Gia Truyền",
+        "text": "Công thức đích thực được lưu truyền qua nhiều thế hệ"
+      },
+      "fastService": {
+        "label": "Phục Vụ Nhanh",
+        "text": "Cập nhật bếp theo thời gian thực, thời gian chờ tối thiểu"
+      }
+    },
+    "footer": {
+      "copyright": "© 2024 Nhà Hàng Viet Gold",
+      "menu": "THỰC ĐƠN",
+      "privacy": "CHÍNH SÁCH",
+      "contact": "LIÊN HỆ"
+    }
+  },
+  "LoginPage": {
+    "tagline": "Hương Vị Truyền Thống",
+    "taglineSubtitle": "Trải nghiệm hương vị Việt Nam đích thực tại Viet Gold",
+    "heading": "Chào Mừng Trở Lại",
+    "subheading": "Đăng nhập vào tài khoản của bạn",
+    "emailLabel": "Email",
+    "passwordLabel": "Mật khẩu",
+    "submit": "Đăng Nhập",
+    "copyright": "© 2024 Viet Gold"
+  },
+  "AdminNav": {
+    "dashboard": "Tổng Quan",
+    "dishes": "Món Ăn",
+    "accounts": "Tài Khoản",
+    "orders": "Đơn Hàng",
+    "tables": "Bàn Ăn",
+    "reservations": "Đặt Bàn",
+    "settings": "Cài Đặt",
+    "logout": "Đăng Xuất"
+  },
+  "Guest": {
+    "Welcome": {
+      "tableLabel": "Bàn {number}",
+      "nameLabel": "Tên của bạn",
+      "namePlaceholder": "Nhập tên của bạn",
+      "submit": "Bắt đầu gọi món",
+      "unavailable": "Bàn này hiện không khả dụng. Vui lòng liên hệ nhân viên để được hỗ trợ."
+    }
+  },
+  "Admin": {
+    "Common": {
+      "loading": "Đang tải...",
+      "cancel": "Hủy",
+      "save": "Lưu",
+      "saving": "Đang lưu...",
+      "close": "Đóng",
+      "delete": "Xóa",
+      "deleting": "Đang xóa...",
+      "edit": "Sửa",
+      "tablePrefix": "Bàn {number}"
+    },
+    "OrderStatus": {
+      "pending": "Chờ xử lý",
+      "preparing": "Đang nấu",
+      "served": "Đã phục vụ",
+      "cancelled": "Đã hủy"
+    },
+    "OrderStatusBadge": {
+      "pending": "CHỜ XỬ LÝ",
+      "preparing": "ĐANG XỬ LÝ",
+      "served": "ĐÃ GIAO",
+      "cancelled": "ĐÃ HỦY"
+    },
+    "Dashboard": {
+      "header": { "title": "Tổng Quan", "subtitle": "Chào mừng trở lại, Admin" },
+      "metrics": {
+        "revenue": "Doanh thu",
+        "revenueChange": "Tổng đơn đã phục vụ",
+        "totalOrders": "Tổng đơn hàng",
+        "totalOrdersProcessing": "{count} đang xử lý",
+        "activeTables": "Bàn đang có khách",
+        "activeTablesOf": "/ {total} bàn tổng",
+        "avgOrderValue": "Giá trị TB / đơn",
+        "avgOrderValueChange": "Trên đơn đã phục vụ"
+      },
+      "charts": {
+        "revenueTitle": "Tổng Quan Doanh Thu",
+        "revenueSubtitle": "Doanh thu theo tháng trong năm hiện tại",
+        "topDishesTitle": "Món Bán Chạy",
+        "topDishesSubtitle": "Món bán chạy (tổng số lượng, trừ đã hủy)",
+        "loading": "Đang tải...",
+        "empty": "Chưa có dữ liệu đơn hàng"
+      },
+      "recentOrders": {
+        "title": "Đơn Hàng Gần Đây",
+        "subtitle": "5 đơn mới nhất từ tất cả bàn",
+        "loading": "Đang tải...",
+        "empty": "Chưa có đơn hàng nào",
+        "columns": {
+          "orderId": "Order ID",
+          "table": "Bàn",
+          "guest": "Khách",
+          "dish": "Món",
+          "total": "Tổng",
+          "status": "Trạng thái",
+          "time": "Giờ"
+        }
+      }
+    },
+    "Accounts": {
+      "header": { "title": "Tài Khoản", "subtitle": "Quản lý tài khoản nhân viên" },
+      "searchPlaceholder": "Tìm theo tên hoặc email...",
+      "createAdmin": "Tạo Admin",
+      "createStaff": "Tạo Staff",
+      "loading": "Đang tải...",
+      "empty": "Không có tài khoản nào"
+    },
+    "Orders": {
+      "header": { "title": "Đơn Hàng", "subtitle": "Quản lý đơn hàng theo thời gian thực" },
+      "loading": "Đang tải...",
+      "dateTo": "đến",
+      "statusAll": "Tất cả trạng thái",
+      "totalCount": "{count} đơn tổng",
+      "createOrder": "Tạo Đơn Hàng",
+      "columns": {
+        "orderId": "ORDER ID",
+        "table": "BÀN",
+        "guest": "KHÁCH",
+        "items": "MÓN",
+        "total": "TỔNG",
+        "status": "TRẠNG THÁI",
+        "time": "GIỜ",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Không có đơn hàng nào",
+      "viewDetails": "Xem chi tiết",
+      "editStatus": "Chỉnh sửa trạng thái",
+      "editModal": {
+        "title": "Cập nhật đơn #{id}",
+        "table": "Bàn",
+        "dish": "Món",
+        "quantity": "Số lượng",
+        "status": "Trạng thái",
+        "cancelOrder": "Hủy đơn",
+        "confirmCancelTitle": "Hủy đơn #{id}?",
+        "confirmCancelDesc": "Đơn sẽ bị đánh dấu Đã hủy. Hành động này không thể hoàn tác.",
+        "keep": "Giữ lại",
+        "confirmCancel": "Xác nhận hủy",
+        "cancelling": "Đang hủy..."
+      }
+    },
+    "Tables": {
+      "header": { "title": "Bàn Ăn", "subtitle": "Quản lý bàn ăn và QR code" },
+      "loading": "Đang tải...",
+      "searchPlaceholder": "Tìm số bàn...",
+      "addTable": "Thêm Bàn",
+      "columns": {
+        "number": "Số Bàn",
+        "capacity": "Sức Chứa",
+        "qrCode": "QR Code",
+        "status": "Trạng Thái"
+      },
+      "capacitySuffix": "chỗ",
+      "empty": "Không có bàn nào",
+      "editAction": "Sửa"
+    },
+    "Reservations": {
+      "header": { "title": "Đặt Bàn", "subtitle": "Quản lý lịch đặt bàn" },
+      "metrics": {
+        "total": "TỔNG LỊCH ĐẶT",
+        "pending": "ĐANG CHỜ",
+        "today": "HÔM NAY"
+      },
+      "searchPlaceholder": "Tìm theo tên hoặc số điện thoại...",
+      "statusAll": "Tất cả trạng thái",
+      "columns": {
+        "guest": "KHÁCH",
+        "phone": "SĐT",
+        "table": "BÀN",
+        "datetime": "NGÀY GIỜ",
+        "guests": "SỐ KHÁCH",
+        "deposit": "CỌC",
+        "note": "GHI CHÚ",
+        "status": "TRẠNG THÁI",
+        "actions": "THAO TÁC"
+      },
+      "empty": "Không có lịch đặt nào",
+      "emptyHint": "Thử thay đổi bộ lọc",
+      "prevPage": "← Trước",
+      "nextPage": "Sau →",
+      "pageOf": "Trang {page} / {totalPages}",
+      "noTable": "Chưa chọn",
+      "reservationStatus": {
+        "booked": "Đã đặt",
+        "checkedIn": "Đã đến",
+        "cancelled": "Đã hủy"
+      },
+      "depositStatus": {
+        "none": "Không cọc",
+        "pending": "Chờ cọc",
+        "paid": "Đã cọc",
+        "refunded": "Đã hoàn",
+        "forfeited": "Mất cọc"
+      },
+      "actions": {
+        "checkIn": "Check-in",
+        "cancel": "Hủy",
+        "markPaid": "Nhận cọc",
+        "delete": "Xóa"
+      }
+    },
+    "Settings": {
+      "header": { "title": "Cài Đặt", "subtitle": "Cập nhật hồ sơ và bảo mật" },
+      "profileTitle": "Hồ Sơ",
+      "changePhoto": "Đổi Ảnh",
+      "fullNameLabel": "Họ Tên",
+      "fullNamePlaceholder": "Nhập họ tên",
+      "emailLabel": "Email",
+      "emailReadonly": "(không thể thay đổi)",
+      "saveChanges": "Lưu Thay Đổi",
+      "saving": "Đang lưu...",
+      "profileUpdated": "Đã cập nhật hồ sơ",
+      "passwordUpdated": "Đổi mật khẩu thành công",
+      "securityTitle": "Bảo Mật",
+      "securityWarning": "Sau khi đổi mật khẩu, bạn sẽ bị đăng xuất khỏi tất cả thiết bị.",
+      "changePasswordTitle": "Đổi Mật Khẩu",
+      "currentPasswordLabel": "Mật Khẩu Hiện Tại",
+      "newPasswordLabel": "Mật Khẩu Mới",
+      "confirmPasswordLabel": "Xác Nhận Mật Khẩu Mới",
+      "updatePassword": "Cập Nhật Mật Khẩu",
+      "updating": "Đang cập nhật..."
+    }
+  }
+}

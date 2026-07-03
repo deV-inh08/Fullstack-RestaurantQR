@@ -91,7 +91,7 @@ function NotificationItem({ notification: n }: { notification: OrderNotification
         <div
             className={cn(
                 'flex gap-3 border-b border-border-subtle px-4 py-3 transition-colors',
-                'hover:bg-gold-subtle/30',
+                'hover:bg-gold-subtle/30 cursor-pointer',
                 !n.read && 'bg-gold-subtle/20'
             )}
         >
