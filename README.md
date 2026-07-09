@@ -22,8 +22,6 @@
 - [Testing](#-testing)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
-- [Troubleshooting](#-troubleshooting)
-- [Known Issues / Roadmap](#-known-issues--roadmap)
 - [License & Author](#-license--author)
 
 ---
