@@ -529,48 +529,6 @@ Each backend service follows the same internal layering: `Domain/Entities` → `
 
 ---
 
-## 📞 Troubleshooting
-
-**SQL Server connection failed**
-
-- Verify SQL Server is running
-- LocalDB: `Server=(localdb)\mssqllocaldb`; named instance: `Server=.\SQLEXPRESS`
-- Test with `sqlcmd -S (localdb)\mssqllocaldb`
-
-**MongoDB connection failed**
-
-- Verify MongoDB is running; default connection string `mongodb://localhost:27017`
-- Test with `mongosh "mongodb://localhost:27017"`
-
-**EF Core migration issues**
-
-```bash
-dotnet ef migrations list      # view pending migrations
-dotnet ef migrations add Name  # add new migration
-dotnet ef migrations remove    # remove last migration
-dotnet ef migrations script    # preview generated SQL
-```
-
-**`Menu.API` unreachable from `Order.API`**
-
-- Confirm `Menu.API` is running on the expected port
-- Check `MenuApi:BaseUrl` in `Order.API`'s `appsettings.json`
-- Review network/firewall rules in production
-
----
-
-## 🗺️ Known Issues / Roadmap
-
-- Dashboard revenue/top-dish charts currently use static sample data; live aggregation logic exists but is commented out pending a decision on date-range aggregation strategy
-- Edit/Delete actions on some admin tables (Dishes) are not yet wired to their mutations
-- Client-side order grouping (table + guest) on the Orders admin page is UI-only — if a guest's items span two pages of server-side pagination, the group can appear split. A backend "check/ticket" concept would resolve this permanently
-- **CORS is fully open across all backend services** — must be restricted to known origins before a real production launch
-- Some guest-facing dialogs (dish add/edit in the admin Dishes page) aren't fully covered by translations yet
-- Frontend `Dockerfile` referenced by `docker-compose.yml` is not yet committed — needed for full-stack local testing via Compose
-- Bundle-size analysis not yet wired into the build (`@next/bundle-analyzer`)
-
----
-
 ## 📄 License & Author
 
 Licensed under the **MIT License** — commercial use, modification, distribution, and private use are all permitted; requires preserving the license and copyright notice.
