@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="BuildingBlocks/Shared.csproj" Id="4e03590a-7473-491b-990d-8d39e5c419b2" />
+  </Folder>
+  <Folder Name="/src/Services/">
+    <Project Path="Gateway.API/Gateway.API.csproj" Id="3dee4375-f8d1-4492-a0c7-179e38f829a0" />
+    <Project Path="src/Services/Identity.API/Identity.API.csproj" />
+    <Project Path="src/Services/Menu.API/Menu.API.csproj" />
+    <Project Path="src/Services/Order.API/Order.API.csproj" />
+    <Project Path="src/Services/Reservation.API/Reservation.API.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Identity.API.Tests/Identity.API.Tests.csproj" />
+    <Project Path="tests/Menu.API.Tests/Menu.API.Tests.csproj" />
+    <Project Path="tests/Order.API.Tests/Order.API.Tests.csproj" />
+    <Project Path="tests/Reservation.API.Tests/Reservation.API.Tests.csproj" />
+  </Folder>
+</Solution>

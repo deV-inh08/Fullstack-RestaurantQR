@@ -1,0 +1,15 @@
+properties:
+  template:
+    volumes:
+      - name: menu-images-vol
+        storageType: AzureFile
+        storageName: menuimages
+    containers:
+      - name: menu-api
+        image: restaurantqracr.azurecr.io/menu-api:latest
+        resources:
+          cpu: 0.25
+          memory: 0.5Gi
+        volumeMounts:
+          - volumeName: menu-images-vol
+            mountPath: /app/wwwroot/images

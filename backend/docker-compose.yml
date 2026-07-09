@@ -1,0 +1,209 @@
+version: "3.9"
+
+# ─── RestaurantQR — Full Stack ────────────────────────────────────────────────
+# Khởi động: docker-compose up -d
+# Dừng:      docker-compose down
+# Reset DB:  docker-compose down -v
+
+services:
+
+  # ─── SQL Server ─────────────────────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: restaurantqr-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SQL_SA_PASSWORD:-StrongPass123!}"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${SQL_SA_PASSWORD:-StrongPass123!}" -Q "SELECT 1" -No || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - restaurantqr-net
+
+  # ─── MongoDB ─────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: restaurantqr-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_USER:-admin}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD:-StrongPass123!}"
+      MONGO_INITDB_DATABASE: ReservationDb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - restaurantqr-net
+
+  # ─── Identity.API ────────────────────────────────────────────────────────────
+  identity-api:
+    build:
+      context: .
+      dockerfile: src/Services/Identity.API/Dockerfile
+    container_name: restaurantqr-identity
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:3001
+      ConnectionStrings__IdentityDb: "Server=sqlserver,1433;Database=IdentityDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      Jwt__Issuer: RestaurantQR
+      Jwt__Audience: RestaurantQR
+      Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
+      Jwt__RefreshTokenSecret: "${JWT_REFRESH_SECRET}"
+      Jwt__AccessTokenExpiresInMinutes: "15"
+      Jwt__RefreshTokenExpiresInDays: "7"
+    ports:
+      - "3001:3001"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+  # ─── Menu.API ────────────────────────────────────────────────────────────────
+  menu-api:
+    build:
+      context: .
+      dockerfile: src/Services/Menu.API/Dockerfile
+    container_name: restaurantqr-menu
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:3002
+      ConnectionStrings__MenuDb: "Server=sqlserver,1433;Database=MenuDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      Jwt__Issuer: RestaurantQR
+      Jwt__Audience: RestaurantQR
+      Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
+    ports:
+      - "3002:3002"
+    volumes:
+      - menu_images:/app/wwwroot/images
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+  # ─── Order.API ───────────────────────────────────────────────────────────────
+  order-api:
+    build:
+      context: .
+      dockerfile: src/Services/Order.API/Dockerfile
+    container_name: restaurantqr-order
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5219
+      ConnectionStrings__OrderDb: "Server=sqlserver,1433;Database=OrderDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      Jwt__Issuer: RestaurantQR
+      Jwt__Audience: RestaurantQR
+      Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
+      GuestJwt__Issuer: RestaurantQR
+      GuestJwt__Audience: RestaurantQR
+      GuestJwt__AccessTokenSecret: "${GUEST_JWT_ACCESS_SECRET}"
+      GuestJwt__RefreshTokenSecret: "${GUEST_JWT_REFRESH_SECRET}"
+      GuestJwt__AccessTokenExpiresInMinutes: "60"
+      GuestJwt__RefreshTokenExpiresInDays: "1"
+      MenuApi__BaseUrl: "http://menu-api:3002"
+      # ✅ FIX 5: CORS — cho phép cả Gateway và Frontend trực tiếp
+      AllowedOrigins__0: "${FRONTEND_URL:-http://localhost:4000}"
+      AllowedOrigins__1: "${GATEWAY_URL:-http://localhost:5000}"
+    ports:
+      - "5219:5219"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      menu-api:
+        condition: service_started
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+  # ─── Reservation.API ─────────────────────────────────────────────────────────
+  reservation-api:
+    build:
+      context: .
+      dockerfile: src/Services/Reservation.API/Dockerfile
+    container_name: restaurantqr-reservation
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:3004
+      MongoDb__ConnectionString: "mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-StrongPass123!}@mongodb:27017"
+      MongoDb__DatabaseName: ReservationDb
+      Jwt__Issuer: RestaurantQR
+      Jwt__Audience: RestaurantQR
+      Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
+    ports:
+      - "3004:3004"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+  # ─── Gateway.API (YARP) ──────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Gateway.API/Dockerfile
+    container_name: restaurantqr-gateway
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5000
+      AllowedOrigins__0: "${FRONTEND_URL:-http://localhost:4000}"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - identity-api
+      - menu-api
+      - order-api
+      - reservation-api
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+  # ─── Frontend (Next.js) ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_URL: "${FRONTEND_URL:-http://localhost:4000}"
+        NEXT_PUBLIC_API_IDENTITY: "${GATEWAY_URL:-http://localhost:5000}/api/v1"
+        NEXT_PUBLIC_API_MENU: "${GATEWAY_URL:-http://localhost:5000}/api/v1"
+        NEXT_PUBLIC_API_ORDER: "${GATEWAY_URL:-http://localhost:5000}/api/v1"
+        NEXT_PUBLIC_API_RESERVATION: "${GATEWAY_URL:-http://localhost:5000}/api/v1"
+        NEXT_PUBLIC_SIGNALR_ORDER: "${GATEWAY_URL:-http://localhost:5000}"
+    container_name: restaurantqr-frontend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - gateway
+    networks:
+      - restaurantqr-net
+    restart: unless-stopped
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  sqlserver_data:
+  mongodb_data:
+  menu_images:
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  restaurantqr-net:
+    driver: bridge
