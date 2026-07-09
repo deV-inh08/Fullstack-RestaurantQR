@@ -1,0 +1,203 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Modern Upscale Vietnamese Restaurant Design System */
+:root {
+  /* Backgrounds - Warm Black */
+  --background: #0D0B08;
+  --surface: #1A1714;
+  --card: #221F1A;
+  --card-foreground: #F5F0E8;
+  /* Primary text: Warm White */
+  --foreground: #F5F0E8;
+  /* Popover */
+  --popover: #1A1714;
+  --popover-foreground: #F5F0E8;
+  /* Primary: Gold */
+  --primary: #FFC000;
+  --primary-foreground: #0D0B08;
+  /* Secondary: Ghost white-border style */
+  --secondary: transparent;
+  --secondary-foreground: #F5F0E8;
+  /* Muted: Warm Gray */
+  --muted: #1A1714;
+  --muted-foreground: #8A7F72;
+  /* Accent: Gold */
+  --accent: #FFC000;
+  --accent-foreground: #0D0B08;
+  /* Destructive */
+  --destructive: #FF3B30;
+  --destructive-foreground: #FFFFFF;
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --input: #0D0B08;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --ring: #FFC000;
+  /* Gold utilities */
+  --gold-primary: #FFC000;
+  --gold-subtle: rgba(255, 192, 0, 0.08);
+  --gold-border: rgba(255, 192, 0, 0.2);
+  --text-primary: #F5F0E8;
+  --text-muted: #8A7F72;
+  --text-gold: #FFC000;
+  /* Charts - Gold theme */
+  --chart-1: #FFC000;
+  --chart-2: #917300;
+  --chart-3: #FFD54F;
+  --chart-4: #8A7F72;
+  --chart-5: #F5F0E8;
+  /* Sidebar */
+  --sidebar: #0D0B08;
+  --sidebar-foreground: #F5F0E8;
+  --sidebar-primary: #FFC000;
+  --sidebar-primary-foreground: #0D0B08;
+  --sidebar-accent: #FFC000;
+  --sidebar-accent-foreground: #0D0B08;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #FFC000;
+}
+
+/* Dark mode uses same colors - always dark */
+.dark {
+  --background: #0D0B08;
+  --surface: #1A1714;
+  --card: #221F1A;
+  --card-foreground: #F5F0E8;
+  --foreground: #F5F0E8;
+  --popover: #1A1714;
+  --popover-foreground: #F5F0E8;
+  --primary: #FFC000;
+  --primary-foreground: #0D0B08;
+  --secondary: transparent;
+  --secondary-foreground: #F5F0E8;
+  --muted: #1A1714;
+  --muted-foreground: #8A7F72;
+  --accent: #FFC000;
+  --accent-foreground: #0D0B08;
+  --destructive: #FF3B30;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --input: #0D0B08;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --ring: #FFC000;
+  --gold-primary: #FFC000;
+  --gold-subtle: rgba(255, 192, 0, 0.08);
+  --gold-border: rgba(255, 192, 0, 0.2);
+  --text-primary: #F5F0E8;
+  --text-muted: #8A7F72;
+  --text-gold: #FFC000;
+  --chart-1: #FFC000;
+  --chart-2: #917300;
+  --chart-3: #FFD54F;
+  --chart-4: #8A7F72;
+  --chart-5: #F5F0E8;
+  --sidebar: #0D0B08;
+  --sidebar-foreground: #F5F0E8;
+  --sidebar-primary: #FFC000;
+  --sidebar-primary-foreground: #0D0B08;
+  --sidebar-accent: #FFC000;
+  --sidebar-accent-foreground: #0D0B08;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #FFC000;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+  --color-ring: var(--ring);
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-subtle: var(--gold-subtle);
+  --color-gold-border: var(--gold-border);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-text-gold: var(--text-gold);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  /* Rounded corners for modern aesthetic */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply bg-background font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Headings with tight line-height */
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    line-height: 0.95;
+  }
+  
+  /* Input styling */
+  input, textarea, select {
+    @apply bg-input text-foreground placeholder-muted-foreground;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    @apply ring-2 ring-ring border-gold-primary;
+  }
+}
+
+/* Shadows */
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  .shadow-modal {
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+  }
+  
+  .shadow-gold {
+    box-shadow: 0 0 20px rgba(255, 192, 0, 0.12);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 0 2px rgba(255, 192, 0, 0.25);
+  }
+}
