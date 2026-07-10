@@ -404,6 +404,8 @@ The frontend is fully bilingual (`vi` default, `en`) via [`next-intl`](https://n
 
 ## 🧪 Testing
 
+![Architecture diagram](docs/testing.png)
+
 ```bash
 # Per-service backend tests
 cd backend/tests/Identity.API.Tests && dotnet test
@@ -418,7 +420,7 @@ cd backend && dotnet test --no-build
 cd frontend && npm run lint
 ```
 
-Each backend test project includes unit tests for service logic and integration tests for API endpoints, with external dependencies mocked.
+Each backend test project includes unit tests for service logic and integration tests for API endpoints, achieving 55.8% line coverage on critical business logic
 
 ---
 
