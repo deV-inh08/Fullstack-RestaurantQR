@@ -48,21 +48,24 @@ cleanup() {
 }
 trap cleanup TERM INT
 
+# Copy Gateway configuration to root /app as safety fallback
+cp /app/gateway/appsettings*.json /app/ 2>/dev/null || true
+
 # 1. Start Identity.API
 echo "Starting Identity.API on 127.0.0.1:3001..."
-ASPNETCORE_URLS="http://127.0.0.1:3001" dotnet /app/identity/Identity.API.dll &
+(cd /app/identity && ASPNETCORE_URLS="http://127.0.0.1:3001" dotnet Identity.API.dll) &
 
 # 2. Start Menu.API
 echo "Starting Menu.API on 127.0.0.1:3002..."
-ASPNETCORE_URLS="http://127.0.0.1:3002" dotnet /app/menu/Menu.API.dll &
+(cd /app/menu && ASPNETCORE_URLS="http://127.0.0.1:3002" dotnet Menu.API.dll) &
 
 # 3. Start Order.API
 echo "Starting Order.API on 127.0.0.1:5219..."
-ASPNETCORE_URLS="http://127.0.0.1:5219" dotnet /app/order/Order.API.dll &
+(cd /app/order && ASPNETCORE_URLS="http://127.0.0.1:5219" dotnet Order.API.dll) &
 
 # 4. Start Reservation.API
 echo "Starting Reservation.API on 127.0.0.1:3004..."
-ASPNETCORE_URLS="http://127.0.0.1:3004" dotnet /app/reservation/Reservation.API.dll &
+(cd /app/reservation && ASPNETCORE_URLS="http://127.0.0.1:3004" dotnet Reservation.API.dll) &
 
 # Wait briefly for internal services to spin up
 sleep 4
@@ -70,4 +73,5 @@ sleep 4
 # 5. Start Gateway.API (Frontend entry point on Heroku assigned $PORT)
 PORT="${PORT:-8080}"
 echo "Starting Gateway.API on port $PORT..."
-ASPNETCORE_URLS="http://0.0.0.0:${PORT}" exec dotnet /app/gateway/Gateway.API.dll
+cd /app/gateway
+ASPNETCORE_URLS="http://0.0.0.0:${PORT}" exec dotnet Gateway.API.dll
