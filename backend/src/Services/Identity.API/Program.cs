@@ -58,11 +58,14 @@ try
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
     });
 
-    // ─── EF Core + SQL Server ─────────────────────────
+    // ─── Npgsql DateTime compatibility ───────────────────
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+    // ─── EF Core + PostgreSQL ─────────────────────────
     builder.Services.AddDbContext<IdentityDbContext>(options =>
-        options.UseSqlServer(
+        options.UseNpgsql(
             builder.Configuration.GetConnectionString("IdentityDb"),
-            sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
 
     // ─── JWT ──────────────────────────────────────────
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
@@ -147,11 +150,11 @@ try
 
     // ─── Health Checks ────────────────────────────────
     builder.Services.AddHealthChecks()
-        .AddSqlServer(
-            connectionString: builder.Configuration.GetConnectionString("IdentityDb")!,
-            name: "sqlserver",
+        .AddNpgSql(
+            builder.Configuration.GetConnectionString("IdentityDb")!,
+            name: "postgres",
             failureStatus: HealthStatus.Unhealthy,
-            tags: ["db", "sql"]);
+            tags: ["db", "postgres"]);
 
 
     // ─── Services ─────────────────────────────────────

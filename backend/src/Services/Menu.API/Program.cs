@@ -53,10 +53,13 @@ try
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
     });
 
+    // ─── Npgsql DateTime compatibility ───────────────────
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
     builder.Services.AddDbContext<MenuDbContext>(options =>
-        options.UseSqlServer(
+        options.UseNpgsql(
             builder.Configuration.GetConnectionString("MenuDb"),
-            sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
 
     var jwtIssuer = builder.Configuration["Jwt:Issuer"];
     var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -104,11 +107,11 @@ try
 
     // ─── Health Checks ────────────────────────────────
     builder.Services.AddHealthChecks()
-        .AddSqlServer(
-            connectionString: builder.Configuration.GetConnectionString("MenuDb")!,
-            name: "sqlserver",
+        .AddNpgSql(
+            builder.Configuration.GetConnectionString("MenuDb")!,
+            name: "postgres",
             failureStatus: HealthStatus.Unhealthy,
-            tags: ["db", "sql"]);
+            tags: ["db", "postgres"]);
 
     builder.Services.AddScoped<IFileUploadUtil, FileUploadUtil>();
     builder.Services.AddScoped<MenuService>();

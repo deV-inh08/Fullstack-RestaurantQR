@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Order.API.Domain.Entities;
 
@@ -24,7 +24,7 @@ public class BillConfiguration : IEntityTypeConfiguration<Bill>
 
         builder.Property(b => b.TotalAmount)
             .IsRequired()
-            .HasColumnType("decimal(18,2)");
+            .HasColumnType("numeric(18,2)");
 
         // Status stored as int (enum) — Unpaid=1, Requested=2, Paid=3
         builder.Property(b => b.Status)

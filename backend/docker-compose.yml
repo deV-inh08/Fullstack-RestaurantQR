@@ -7,24 +7,25 @@ version: "3.9"
 
 services:
 
-  # ─── SQL Server ─────────────────────────────────────────────────────────────
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: restaurantqr-sqlserver
+  # ─── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    container_name: restaurantqr-postgres
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "${SQL_SA_PASSWORD:-StrongPass123!}"
-      MSSQL_PID: Developer
+      POSTGRES_USER: "${PG_USER:-admin}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD:-StrongPass123!}"
+      POSTGRES_DB: postgres
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-postgres.sh:/docker-entrypoint-initdb.d/init-postgres.sh:ro
     healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${SQL_SA_PASSWORD:-StrongPass123!}" -Q "SELECT 1" -No || exit 1
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-admin} -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 20s
     networks:
       - restaurantqr-net
 
@@ -58,7 +59,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:3001
-      ConnectionStrings__IdentityDb: "Server=sqlserver,1433;Database=IdentityDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      ConnectionStrings__IdentityDb: "Host=postgres;Database=IdentityDb;Username=${PG_USER:-admin};Password=${PG_PASSWORD:-StrongPass123!}"
       Jwt__Issuer: RestaurantQR
       Jwt__Audience: RestaurantQR
       Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
@@ -68,7 +69,7 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
     networks:
       - restaurantqr-net
@@ -83,7 +84,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:3002
-      ConnectionStrings__MenuDb: "Server=sqlserver,1433;Database=MenuDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      ConnectionStrings__MenuDb: "Host=postgres;Database=MenuDb;Username=${PG_USER:-admin};Password=${PG_PASSWORD:-StrongPass123!}"
       Jwt__Issuer: RestaurantQR
       Jwt__Audience: RestaurantQR
       Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
@@ -92,7 +93,7 @@ services:
     volumes:
       - menu_images:/app/wwwroot/images
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
     networks:
       - restaurantqr-net
@@ -107,7 +108,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5219
-      ConnectionStrings__OrderDb: "Server=sqlserver,1433;Database=OrderDb;User Id=sa;Password=${SQL_SA_PASSWORD:-StrongPass123!};TrustServerCertificate=True"
+      ConnectionStrings__OrderDb: "Host=postgres;Database=OrderDb;Username=${PG_USER:-admin};Password=${PG_PASSWORD:-StrongPass123!}"
       Jwt__Issuer: RestaurantQR
       Jwt__Audience: RestaurantQR
       Jwt__AccessTokenSecret: "${JWT_ACCESS_SECRET}"
@@ -118,13 +119,12 @@ services:
       GuestJwt__AccessTokenExpiresInMinutes: "60"
       GuestJwt__RefreshTokenExpiresInDays: "1"
       MenuApi__BaseUrl: "http://menu-api:3002"
-      # ✅ FIX 5: CORS — cho phép cả Gateway và Frontend trực tiếp
       AllowedOrigins__0: "${FRONTEND_URL:-http://localhost:4000}"
       AllowedOrigins__1: "${GATEWAY_URL:-http://localhost:5000}"
     ports:
       - "5219:5219"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       menu-api:
         condition: service_started
@@ -199,7 +199,7 @@ services:
 
 # ─── Volumes ──────────────────────────────────────────────────────────────────
 volumes:
-  sqlserver_data:
+  postgres_data:
   mongodb_data:
   menu_images:
 

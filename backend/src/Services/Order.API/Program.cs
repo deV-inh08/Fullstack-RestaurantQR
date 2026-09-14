@@ -58,10 +58,13 @@ try
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
     });
 
-    // ─── EF Core ──────────────────────────────────────
+    // ─── Npgsql DateTime compatibility ───────────────────
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+    // ─── EF Core + PostgreSQL ─────────────────────────
     builder.Services.AddDbContext<OrderDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("OrderDb"),
-            sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDb"),
+            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
 
     // ─── Guest JWT ────────────────────────────────────
     var guestJwtSettings = builder.Configuration.GetSection("GuestJwt").Get<GuestJwtSettings>()
