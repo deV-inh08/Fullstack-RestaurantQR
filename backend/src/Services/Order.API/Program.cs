@@ -64,7 +64,11 @@ try
     // ─── EF Core + PostgreSQL ─────────────────────────
     builder.Services.AddDbContext<OrderDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDb"),
-            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+            npgsql =>
+            {
+                npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
+                npgsql.MigrationsHistoryTable("__EFMigrationsHistory_Order");
+            }));
 
     // ─── Guest JWT ────────────────────────────────────
     var guestJwtSettings = builder.Configuration.GetSection("GuestJwt").Get<GuestJwtSettings>()

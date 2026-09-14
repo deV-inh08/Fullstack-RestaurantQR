@@ -65,7 +65,11 @@ try
     builder.Services.AddDbContext<IdentityDbContext>(options =>
         options.UseNpgsql(
             builder.Configuration.GetConnectionString("IdentityDb"),
-            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+            npgsql =>
+            {
+                npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
+                npgsql.MigrationsHistoryTable("__EFMigrationsHistory_Identity");
+            }));
 
     // ─── JWT ──────────────────────────────────────────
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()

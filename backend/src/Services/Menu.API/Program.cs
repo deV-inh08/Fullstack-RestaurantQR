@@ -59,7 +59,11 @@ try
     builder.Services.AddDbContext<MenuDbContext>(options =>
         options.UseNpgsql(
             builder.Configuration.GetConnectionString("MenuDb"),
-            npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)));
+            npgsql =>
+            {
+                npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
+                npgsql.MigrationsHistoryTable("__EFMigrationsHistory_Menu");
+            }));
 
     var jwtIssuer = builder.Configuration["Jwt:Issuer"];
     var jwtAudience = builder.Configuration["Jwt:Audience"];
