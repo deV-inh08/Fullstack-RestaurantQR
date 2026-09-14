@@ -4,8 +4,10 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddOpenTelemetry()
-.UseAzureMonitor();
+if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+}
 
 // ─── YARP Reverse Proxy ───────────────────────────────────────────────────────
 builder.Services.AddReverseProxy()

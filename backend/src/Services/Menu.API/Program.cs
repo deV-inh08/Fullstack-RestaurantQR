@@ -30,8 +30,10 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
 
-    builder.Services.AddOpenTelemetry()
-    .UseAzureMonitor();
+    if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+    {
+        builder.Services.AddOpenTelemetry().UseAzureMonitor();
+    }
 
     builder.Host.UseSerilog((ctx, services, config) =>
     {
@@ -43,11 +45,14 @@ try
             .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
 
         if (ctx.HostingEnvironment.IsProduction())
-            config
-                .WriteTo.Console(new RenderedCompactJsonFormatter())
-                .WriteTo.ApplicationInsights(
-                ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
-                TelemetryConverter.Traces);
+        {
+            config.WriteTo.Console(new RenderedCompactJsonFormatter());
+            var appInsightsConn = ctx.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+            if (!string.IsNullOrEmpty(appInsightsConn))
+            {
+                config.WriteTo.ApplicationInsights(appInsightsConn, TelemetryConverter.Traces);
+            }
+        }
         else
             config.WriteTo.Console(outputTemplate:
                 "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
