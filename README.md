@@ -121,7 +121,7 @@ From the sidebar, staff can navigate to every management module:
 
 #### 🎬 Demo Video  Guest Side — QR Ordering Flow
 
-<video src="docs/guestdemo.mp4" controls width="100%" style="border-radius:8px;max-width:480px"></video>
+<video src="https://github.com/user-attachments/assets/2d447672-3c2e-42e4-b5ab-3d82894fb27b" controls width="100%" style="border-radius:8px;max-width:480px"></video>
 
 > _Full guest journey: scan QR → enter name → browse menu → place order → track status → pay._
 
