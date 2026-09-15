@@ -8,6 +8,7 @@
 
 - [Overview](#-overview)
 - [Features](#-features)
+- [UI Guide](#-ui-guide)
 - [System Architecture](#-system-architecture)
 - [Tech Stack](#-tech-stack)
 - [Cloud Deployment](#-cloud-deployment)
@@ -76,6 +77,137 @@ The system is split into two independently deployed parts that communicate over 
 - JWT authentication with role-based access control (SuperAdmin / Admin / Staff), plus a separate short-lived guest token scheme
 - Per-table bill generation and payment tracking
 - Rate limiting on sensitive endpoints (login: 5 req/min per IP)
+
+---
+
+## 🖥️ UI Guide
+
+This section walks through both sides of the product — the **Admin Dashboard** used by restaurant staff, and the **Guest Ordering Flow** triggered by scanning a QR code. Together they cover every major UI screen a real user would encounter.
+
+---
+
+### 👨‍💼 Admin Side — Restaurant Management Dashboard
+
+The admin dashboard is a role-gated web application accessible at `/admin`. Depending on the account role (**SuperAdmin**, **Admin**, or **Staff**), different capabilities are unlocked.
+
+#### 📊 Home — Revenue & Operations Overview
+
+![Admin homepage — manage staff, menu, orders, and revenue](docs/home_admin.png)
+
+The homepage is the control centre for daily operations. At a glance, staff can see:
+
+| Widget | What it shows |
+|---|---|
+| **Revenue card** | Total revenue for today / this month |
+| **Orders card** | Number of orders placed today |
+| **Tables card** | Live count of occupied vs. available tables |
+| **Revenue chart** | Bar/line chart of revenue over time |
+| **Top dishes chart** | Best-selling items by quantity |
+| **Recent orders** | Latest orders with table, guest name, and status |
+
+From the sidebar, staff can navigate to every management module:
+
+- **Dishes** — add, edit, or delete menu items; upload photos; toggle availability
+- **Orders** — live order board per table; update item status in bulk
+- **Tables** — create tables, generate/reset QR codes, view occupancy
+- **Accounts** — manage staff accounts by role (SuperAdmin → Admin → Staff)
+- **Reservations** — handle incoming bookings: confirm, check-in, or cancel
+- **Settings** — update profile name and password
+
+> **Role access:** SuperAdmin sees all modules. Admin manages dishes, orders, tables, reservations, and Staff accounts. Staff can only view and update orders and tables.
+
+---
+
+### 📱 Guest Side — QR Ordering Flow
+
+The guest experience is a progressive, mobile-first flow that requires **zero installation** and **no account**.
+
+---
+
+#### Step 1 — Scan the QR Code
+
+![Guest scans the QR code at the table](docs/scanQR.jpg)
+
+Every table has a unique QR code, generated and printable directly from the admin panel. When a guest scans it with any phone camera, they are taken immediately to the ordering page for that specific table — no redirects, no app store, no friction.
+
+- Each QR code is tied to a `tableId`; staff can reset it at any time (which invalidates all active guest sessions for that table).
+- The URL pattern is `/table/{tableId}/welcome`.
+
+---
+
+#### Step 2 — Enter Your Name
+
+![Guest enters their name to start the session](docs/enterName.jpg)
+
+Before accessing the menu, the guest is asked to enter a display name. This:
+
+- Creates a **guest session** bound to the table (`sessionId` + short-lived token)
+- Shows the guest's name on the admin order board so staff know who ordered what
+- Requires no email, password, or personal data
+
+---
+
+#### Step 3 — Browse the Menu
+
+![Full menu view on mobile](docs/menu.png)
+
+The menu is fetched live from `Menu.API` and rendered in a clean, image-first card layout:
+
+- **Category tabs** at the top let guests filter by food type (e.g., Starters, Mains, Drinks)
+- Each card shows the **dish photo**, name, description, and current price
+- Unavailable dishes are hidden automatically — staff control this from the admin panel
+- The menu reflects the **live catalogue**; any change an admin makes appears immediately
+
+---
+
+#### Step 4 — Add to Cart & Place Order
+
+![Guest adds items to cart and submits the order](docs/menu&order.jpg)
+
+Guests tap a dish to add it to their cart. The cart panel shows:
+
+- All selected items with quantity controls and a running total
+- A **notes** field per order (e.g., "no onions")
+- A **Place Order** button that submits to `Order.API`
+
+Once placed, the order is locked in with a **price snapshot** — if a staff member later changes the dish price, the guest's receipt still reflects what they paid.
+
+---
+
+#### Step 5 — Live Order Status Tracking
+
+![Real-time order status update via SignalR](docs/updateRealtime.jpg)
+
+After ordering, guests see a **live status board** for all their items. Status flows from:
+
+```
+Pending  →  Preparing  →  Served
+```
+
+- Updates are pushed instantly via **SignalR** — no page refresh needed
+- Staff update statuses from the admin order board (per item or in bulk)
+- Both the guest screen and the admin board reflect every change in real time simultaneously
+
+---
+
+#### Step 6 — Request Bill & Pay
+
+![Payment flow — bill request and confirmation](docs/payment.png)
+
+When ready to leave, the guest (or a staff member on their behalf) taps **Request Bill**. This:
+
+1. Generates a bill in `Order.API` containing all ordered items at snapshot prices
+2. Shows the itemised total to both the guest and admin
+3. Staff select the payment method (cash, card, etc.) and mark the bill as **Paid**
+4. The table status automatically returns to **Available**, ready for the next guest
+
+---
+
+### 🧪 Testing Dashboard
+
+![Backend test results](docs/testing.png)
+
+The backend ships with unit and integration tests for all four microservices. The test dashboard above shows the coverage report across `Identity.API`, `Menu.API`, `Order.API`, and `Reservation.API`, achieving **55.8% line coverage** on critical business logic paths.
 
 ---
 
