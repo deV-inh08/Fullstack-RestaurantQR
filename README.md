@@ -118,96 +118,89 @@ From the sidebar, staff can navigate to every management module:
 
 ---
 
-### 📱 Guest Side — QR Ordering Flow
 
-The guest experience is a progressive, mobile-first flow that requires **zero installation** and **no account**.
+#### 🎬 Demo Video  Guest Side — QR Ordering Flow
+
+<video src="docs/guestdemo.mp4" controls width="100%" style="border-radius:8px;max-width:480px"></video>
+
+> _Full guest journey: scan QR → enter name → browse menu → place order → track status → pay._
 
 ---
 
 #### Step 1 — Scan the QR Code
 
-![Guest scans the QR code at the table](docs/scanQR.jpg)
+Every table has a unique QR code generated and printable directly from the admin panel. When a guest points any phone camera at it, they land **instantly** on the ordering page for that table — no app store, no redirect loop, no friction.
 
-Every table has a unique QR code, generated and printable directly from the admin panel. When a guest scans it with any phone camera, they are taken immediately to the ordering page for that specific table — no redirects, no app store, no friction.
-
-- Each QR code is tied to a `tableId`; staff can reset it at any time (which invalidates all active guest sessions for that table).
-- The URL pattern is `/table/{tableId}/welcome`.
+- QR codes are tied to a `tableId`; staff can reset one at any time, which immediately invalidates all active guest sessions for that table.
+- URL pattern: `/table/{tableId}/welcome`
 
 ---
 
 #### Step 2 — Enter Your Name
 
-![Guest enters their name to start the session](docs/enterName.jpg)
+Before the menu appears, the guest enters a display name. Behind the scenes this:
 
-Before accessing the menu, the guest is asked to enter a display name. This:
-
-- Creates a **guest session** bound to the table (`sessionId` + short-lived token)
-- Shows the guest's name on the admin order board so staff know who ordered what
-- Requires no email, password, or personal data
+1. Creates a **guest session** (`sessionId`) bound to the specific table
+2. Issues a short-lived **guest token** (different signing secret from staff JWTs)
+3. Surfaces the guest's name on the admin order board — staff always know who ordered what
+4. Collects **zero personal data** — no email, no phone, no password
 
 ---
 
 #### Step 3 — Browse the Menu
 
-![Full menu view on mobile](docs/menu.png)
 
-The menu is fetched live from `Menu.API` and rendered in a clean, image-first card layout:
+The menu is fetched live from `Menu.API` and rendered in an image-first card grid:
 
-- **Category tabs** at the top let guests filter by food type (e.g., Starters, Mains, Drinks)
-- Each card shows the **dish photo**, name, description, and current price
-- Unavailable dishes are hidden automatically — staff control this from the admin panel
-- The menu reflects the **live catalogue**; any change an admin makes appears immediately
+- **Category tabs** at the top filter by food type (Starters, Mains, Drinks, …)
+- Each card shows the dish photo, name, description, and current price
+- Dishes marked unavailable by staff are **hidden automatically** — no stale data
+- Any admin change (new dish, price update, toggled availability) appears to guests **immediately**
 
 ---
 
-#### Step 4 — Add to Cart & Place Order
+#### Step 4 — Build Cart & Place Order
 
-![Guest adds items to cart and submits the order](docs/menu&order.jpg)
 
-Guests tap a dish to add it to their cart. The cart panel shows:
+Tapping a dish adds it to the cart. The sliding cart panel provides:
 
-- All selected items with quantity controls and a running total
-- A **notes** field per order (e.g., "no onions")
-- A **Place Order** button that submits to `Order.API`
+| Element | Purpose |
+|---|---|
+| Item list + quantity controls | Add more / remove items before confirming |
+| Per-order notes field | Special requests (e.g., "no onions", "extra sauce") |
+| Running total | Live price sum as items are added/removed |
+| **Place Order** button | Submits to `Order.API` and locks in a price snapshot |
 
-Once placed, the order is locked in with a **price snapshot** — if a staff member later changes the dish price, the guest's receipt still reflects what they paid.
+> **Price snapshot:** the order always records the dish price at the moment of submission. If staff later raise the price, the guest's receipt is unaffected.
 
 ---
 
 #### Step 5 — Live Order Status Tracking
 
-![Real-time order status update via SignalR](docs/updateRealtime.jpg)
-
-After ordering, guests see a **live status board** for all their items. Status flows from:
+After placing the order, the guest sees a **live status board** — no polling, no refresh needed. Order status flows as:
 
 ```
 Pending  →  Preparing  →  Served
 ```
 
-- Updates are pushed instantly via **SignalR** — no page refresh needed
-- Staff update statuses from the admin order board (per item or in bulk)
-- Both the guest screen and the admin board reflect every change in real time simultaneously
+- Status changes are **pushed in real time** via **SignalR** (`OrderHub`) to both the guest screen and the admin board simultaneously
+- Staff update status per item or in bulk from the admin order board
+- Guests can place additional orders at any time; each appears on the board instantly
 
 ---
 
 #### Step 6 — Request Bill & Pay
 
-![Payment flow — bill request and confirmation](docs/payment.png)
+When the meal is done:
 
-When ready to leave, the guest (or a staff member on their behalf) taps **Request Bill**. This:
-
-1. Generates a bill in `Order.API` containing all ordered items at snapshot prices
-2. Shows the itemised total to both the guest and admin
-3. Staff select the payment method (cash, card, etc.) and mark the bill as **Paid**
-4. The table status automatically returns to **Available**, ready for the next guest
+1. The guest (or a staff member) taps **Request Bill** on the status page
+2. `Order.API` generates an itemised bill using the locked price snapshots
+3. The admin sees the bill request and selects the payment method (cash, card, transfer, …)
+4. Staff confirm payment → bill status becomes **Paid**
+5. The table status flips back to **Available** automatically, ready for the next guest
 
 ---
 
-### 🧪 Testing Dashboard
-
-![Backend test results](docs/testing.png)
-
-The backend ships with unit and integration tests for all four microservices. The test dashboard above shows the coverage report across `Identity.API`, `Menu.API`, `Order.API`, and `Reservation.API`, achieving **55.8% line coverage** on critical business logic paths.
 
 ---
 
