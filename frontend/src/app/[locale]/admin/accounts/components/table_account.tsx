@@ -108,7 +108,7 @@ const TableAccount = ({ accounts }: TableAccountProps) => {
                             </TableCell>
                         </TableRow>
                     )}
-                    {accounts.map((account) => (
+                    {accounts.filter(a => a.role !== 'SuperAdmin').map((account) => (
                         <TableRow
                             key={account.id}
                             className="border-border-subtle transition-colors hover:bg-gold-subtle/30"

@@ -22,8 +22,8 @@ export default function LoginPage() {
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBodySchema),
     defaultValues: {
-      email: '',
-      password: ''
+      email: 'test@admin.com',
+      password: '@test12345@'
     }
   })
   const loginMutation = useLoginMutation();
@@ -158,6 +158,19 @@ export default function LoginPage() {
 
             </form>
           </Form>
+
+          {/* Demo credentials hint */}
+          <div className="mt-5 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+              Demo account
+            </p>
+            <p className="text-xs text-muted-foreground/50">
+              Email: <span className="font-mono select-all">test@admin.com</span>
+            </p>
+            <p className="text-xs text-muted-foreground/50">
+              Password: <span className="font-mono select-all">@test12345@</span>
+            </p>
+          </div>
 
           {/* Divider */}
           <div className="my-8 border-t border-border-subtle" />
